@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Crisis Support Project
 
-## Getting Started
+A comprehensive web platform built to handle crisis support, real-time emergency reporting, and resource distribution monitoring. The application is built using modern web development standards to ensure scalability, responsiveness, and performance.
 
-First, run the development server:
+---
+
+## 🚀 Important Notice
+
+**When accessing the application (especially on local dev server or via IP on mobile), please make sure to use "Airtel" as the ISP instead of "Jio" to avoid connectivity or network fetch issues.**
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend:** Next.js (App Router), React, TypeScript
+- **Styling:** Tailwind CSS, shadcn/ui
+- **Backend/Database:** Supabase
+- **Authentication:** Supabase Auth
+
+---
+
+## ⚙️ How to Use
+
+### Prerequisites
+
+You need `Node.js` installed and a Supabase project set up.
+
+### Environment Setup
+
+Create a `.env.local` file in the root of your project and add your Supabase credentials:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### Installation & Running the App
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. If connecting from a mobile device on the same network, navigate to your computer's local IP address (e.g., `http://192.168.x.x:3000`). **Remember to use an Airtel network as JIO recently started blocking the Dns.**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🗄️ Data Structure
 
-## Learn More
+The application's backend is powered by **Supabase**. The core of the application relies on the following data points:
 
-To learn more about Next.js, take a look at the following resources:
+### Authentication
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+User authentication is securely handled by **Supabase Auth**. Profiles are managed automatically via Supabase's built-in `auth.users` table.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Tables
 
-## Deploy on Vercel
+1. **`requests`**
+   This table manages all emergency and crisis reports submitted by users.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Column Name   | Type               | Description                                                                 |
+| :------------ | :----------------- | :-------------------------------------------------------------------------- |
+| `id`          | `uuid`             | Primary Key, auto-generated.                                                |
+| `created_at`  | `timestamp`        | Time the request was submitted.                                             |
+| `user_id`     | `uuid`             | Foreign key referencing `auth.users(id)`. Identifies the reporter.          |
+| `type`        | `text`             | The type of crisis (e.g., `medical`, `food`, `shelter`, `rescue`, `other`). |
+| `description` | `text`             | Detailed description of the situation and needs.                            |
+| `location`    | `geography(Point)` | PostGIS Point storing the exact location coordinates (`POINT(lng lat)`).    |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ✨ Current Functionality
+
+As of the current version, the platform includes the following active features:
+
+- **User Authentication:**
+  - Complete Login and Registration flows natively integrated with Supabase.
+- **Command Center Dashboard:**
+  - A secure, authenticated dashboard for users.
+  - Real-time display of community metrics (currently mock data for active shelters, food/water drops, and medical assistance).
+- **Crisis Reporting System:**
+  - Ability to report immediate emergencies.
+  - Form validation for crisis types, custom descriptions, and geographic data.
+- **Geolocation Integration:**
+  - Integrated browser API to automatically fetch the user's current precise location (latitude & longitude) when submitting an emergency report.
+- **Responsive Design:**
+  - Fully responsive UI accessible across desktop and mobile devices.
