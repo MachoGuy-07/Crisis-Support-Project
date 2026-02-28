@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, UsersRound } from "lucide-react";
 
@@ -9,24 +10,7 @@ export default function HomePage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(244,114,182,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(251,146,60,0.18),transparent_33%),linear-gradient(125deg,#030303,#0d0d0d_50%,#050505)]" />
       <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:44px_44px]" />
 
-      <header className="relative z-10 mx-auto flex w-full max-w-[1320px] items-center justify-between px-6 py-8">
-        <Logo />
-        <nav className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            asChild
-            className="hidden sm:inline-flex text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button
-            asChild
-            className="rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 text-zinc-900 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(251,113,133,0.45)]"
-          >
-            <Link href="/login">Get Started</Link>
-          </Button>
-        </nav>
-      </header>
+      <Navbar />
 
       <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
         <div className="mb-8 inline-flex items-center rounded-full border border-rose-200/25 bg-rose-300/10 px-4 py-1 text-sm font-medium text-rose-100">
