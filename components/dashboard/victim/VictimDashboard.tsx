@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  motion,
-  useMotionValueEvent,
-  useSpring,
-} from "framer-motion";
+import { motion, useMotionValueEvent, useSpring } from "framer-motion";
 import {
   AlertTriangle,
   Building2,
+  CheckCircle2,
   Cross,
   Droplets,
   Home,
   Loader2,
+  MapPin,
   PackageOpen,
   Search,
   Users,
@@ -26,7 +24,25 @@ import { useDataContext } from "@/context/DataContext";
 import { FALLBACK_LOCATION } from "@/mockData/crisisData";
 import type { NGO } from "@/types/crisis";
 import { distanceInKm, isWithinRadius } from "@/utils/geo";
-
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/lib/supabaseClient";
 interface VictimDashboardProps {
   email: string;
 }
@@ -35,7 +51,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   const { ngos, requests, placeOrder, userLocation } = useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
-  const [radiusKm, setRadiusKm] = useState(65);
+  const [radiusKm, setRadiusKm] = useState(25);
   const [searchText, setSearchText] = useState("");
   const [scanActive, setScanActive] = useState(false);
   const [pulseScale, setPulseScale] = useState(1.08);
@@ -48,6 +64,16 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
     mass: 0.92,
   });
   const [animatedRadiusKm, setAnimatedRadiusKm] = useState(radiusKm);
+  // Form state
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [reportType, setReportType] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
+  const [numberOfPeople, setNumberOfPeople] = useState(1);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     radiusSpring.set(radiusKm);
@@ -84,7 +110,11 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   const filteredNgos = useMemo(() => {
     const query = searchText.trim().toLowerCase();
     return ngos.filter((ngo) => {
-      const withinRadius = isWithinRadius(center, ngo.location, animatedRadiusKm);
+      const withinRadius = isWithinRadius(
+        center,
+        ngo.location,
+        animatedRadiusKm,
+      );
       if (!withinRadius) return false;
       if (!query) return true;
       return (
@@ -106,7 +136,8 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   }, [filteredNgos]);
 
   const volunteersReady = useMemo(
-    () => requests.filter((request) => request.status === "pending").length + 18,
+    () =>
+      requests.filter((request) => request.status === "pending").length + 18,
     [requests],
   );
 
@@ -120,15 +151,105 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       if (scanTimeoutRef.current) {
         window.clearTimeout(scanTimeoutRef.current);
       }
-      scanTimeoutRef.current = window.setTimeout(() => setScanActive(false), 900);
+      scanTimeoutRef.current = window.setTimeout(
+        () => setScanActive(false),
+        900,
+      );
     }
     setRadiusKm(nextRadius);
   };
 
+  const getLocation = () => {
+    setIsGettingLocation(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setIsGettingLocation(false);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          let errorMessage =
+            "Could not get your location. Please ensure location permissions are granted.";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage =
+                "Location request denied by user. Please enable location permissions in your browser.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Location information is unavailable.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "The request to get user location timed out.";
+              break;
+          }
+          alert(errorMessage);
+          setIsGettingLocation(false);
+        },
+        { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+      setIsGettingLocation(false);
+    }
+  };
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportType || !reportDescription || !location) {
+      alert("Please fill in all fields and get your location.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        alert("You must be logged in to report a crisis.");
+        return;
+      }
+
+      const locationWKT = `POINT(${location.lng} ${location.lat})`;
+
+      const { error } = await supabase.from("requests").insert({
+        user_id: session.user.id,
+        type: reportType,
+        description: reportDescription,
+        number_of_people: numberOfPeople,
+        location: locationWKT,
+      });
+
+      if (error) throw error;
+
+      alert("Crisis reported successfully. Help is on the way.");
+      setIsReportOpen(false);
+      setReportType("");
+      setReportDescription("");
+      setNumberOfPeople(1);
+      setLocation(null);
+    } catch (error: unknown) {
+      console.error("Error submitting report:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to submit report.";
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
-      <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[260px_1fr]">
+      <motion.section
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[260px_1fr_auto]">
           <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Radius
@@ -138,10 +259,14 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
               min={1}
               max={65}
               value={radiusKm}
-              onChange={(event) => handleRadiusChange(Number(event.target.value))}
+              onChange={(event) =>
+                handleRadiusChange(Number(event.target.value))
+              }
               className="w-full accent-rose-300"
             />
-            <p className="mt-2 text-sm font-semibold text-zinc-200">{radiusKm} km</p>
+            <p className="mt-2 text-sm font-semibold text-zinc-200">
+              {radiusKm} km
+            </p>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -156,6 +281,121 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
                 className="h-10 border-0 bg-transparent px-0 focus-visible:ring-0"
               />
             </div>
+          </div>
+
+          {/* Report Crisis Button rendering as a distinct block in the grid */}
+          <div className="rounded-2xl border border-white/10 bg-black/35 p-3 flex flex-col justify-center">
+            <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_hsla(var(--primary)/25%)] hover:shadow-[0_0_30px_hsla(var(--primary)/35%)] rounded-xl transition-all hover:-translate-y-0.5">
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Report Crisis
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Report a Crisis</DialogTitle>
+                  <DialogDescription>
+                    Provide details about the situation and your current
+                    location to request assistance.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmitReport} className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="type">Crisis Type</Label>
+                    <Select
+                      value={reportType}
+                      onValueChange={setReportType}
+                      required
+                    >
+                      <SelectTrigger id="type">
+                        <SelectValue placeholder="Select crisis type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="medical">
+                          Medical Emergency
+                        </SelectItem>
+                        <SelectItem value="food">
+                          Food/Water Shortage
+                        </SelectItem>
+                        <SelectItem value="shelter">Need Shelter</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe the situation, number of people involved, and specific needs..."
+                      value={reportDescription}
+                      onChange={(e) => setReportDescription(e.target.value)}
+                      required
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="peopleCount">
+                      Number of People Affected
+                    </Label>
+                    <Input
+                      id="peopleCount"
+                      type="number"
+                      min="1"
+                      value={numberOfPeople}
+                      onChange={(e) =>
+                        setNumberOfPeople(parseInt(e.target.value) || 1)
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Location</Label>
+                    {location ? (
+                      <div className="flex items-center gap-2 text-sm text-green-500 bg-green-500/10 p-3 rounded-md border border-green-500/20">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Location acquired ({location.lat.toFixed(4)},{" "}
+                        {location.lng.toFixed(4)})
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={getLocation}
+                        disabled={isGettingLocation}
+                        className="w-full"
+                      >
+                        {isGettingLocation ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Acquiring Location...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin className="mr-2 h-4 w-4" />
+                            Get Current Location
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full mt-4"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting Report...
+                      </>
+                    ) : (
+                      "Submit Report"
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </motion.section>
@@ -233,8 +473,8 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       <section className="space-y-3">
         <h3 className="text-2xl font-bold text-white">Supply Monitoring</h3>
         <p className="text-sm text-zinc-400">
-          Showing {filteredNgos.length} relief centers within {radiusKm} km. Using a
-          fixed inventory snapshot for Hyderabad and Secunderabad.
+          Showing {filteredNgos.length} relief centers within {radiusKm} km.
+          Using a fixed inventory snapshot for Hyderabad and Secunderabad.
         </p>
         <div className="columns-1 gap-4 md:columns-2 xl:columns-3">
           {filteredNgos.map((ngo, index) => (
@@ -267,13 +507,20 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
                 <CardContent className="space-y-4 px-6 pb-6">
                   <div className="grid grid-cols-1 gap-2 text-base sm:grid-cols-3">
                     <div className="rounded-lg border border-rose-300/30 bg-rose-500/12 px-4 py-2.5 text-rose-100">
-                      Food: <span className="font-semibold">{ngo.supplies.food}</span>
+                      Food:{" "}
+                      <span className="font-semibold">{ngo.supplies.food}</span>
                     </div>
                     <div className="rounded-lg border border-emerald-300/30 bg-emerald-500/12 px-4 py-2.5 text-emerald-100">
-                      Medical: <span className="font-semibold">{ngo.supplies.medical}</span>
+                      Medical:{" "}
+                      <span className="font-semibold">
+                        {ngo.supplies.medical}
+                      </span>
                     </div>
                     <div className="rounded-lg border border-sky-300/30 bg-sky-500/12 px-4 py-2.5 text-sky-100">
-                      Shelter: <span className="font-semibold">{ngo.supplies.shelter}</span>
+                      Shelter:{" "}
+                      <span className="font-semibold">
+                        {ngo.supplies.shelter}
+                      </span>
                     </div>
                   </div>
                   <div className="text-sm text-zinc-400">
@@ -294,8 +541,8 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
 
       <section className="rounded-3xl border border-rose-300/20 bg-rose-500/5 p-4 text-sm text-zinc-300">
         <PackageOpen className="mr-2 inline h-4 w-4 text-rose-200" />
-        Click any NGO marker on the map to select supply type, enter quantity, and
-        place an order instantly.
+        Click any NGO marker on the map to select supply type, enter quantity,
+        and place an order instantly.
       </section>
     </div>
   );

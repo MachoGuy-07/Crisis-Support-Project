@@ -20,7 +20,10 @@ interface VolunteerDashboardProps {
 
 type FilterType = "all" | "food" | "medical" | "shelter" | "other";
 
-const filterOptions: Array<{ value: Exclude<FilterType, "all">; label: string }> = [
+const filterOptions: Array<{
+  value: Exclude<FilterType, "all">;
+  label: string;
+}> = [
   { value: "food", label: "Food" },
   { value: "medical", label: "Medical" },
   { value: "shelter", label: "Shelter" },
@@ -38,7 +41,8 @@ export function VolunteerDashboard({
   mapOpen,
   onMapOpenChange,
 }: VolunteerDashboardProps) {
-  const { requests, volunteerSupply, acceptRequest, userLocation } = useDataContext();
+  const { requests, volunteerSupply, acceptRequest, userLocation } =
+    useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
   const [filterType, setFilterType] = useState<FilterType>("all");
@@ -66,7 +70,8 @@ export function VolunteerDashboard({
   const prioritizedRequests = useMemo(() => {
     return [...filteredRequests].sort((a, b) => {
       if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
-      if (a.priority !== b.priority) return priorityRank[a.priority] - priorityRank[b.priority];
+      if (a.priority !== b.priority)
+        return priorityRank[a.priority] - priorityRank[b.priority];
       return b.createdAt - a.createdAt;
     });
   }, [filteredRequests]);
@@ -171,7 +176,7 @@ export function VolunteerDashboard({
       <button
         type="button"
         onClick={() => onMapOpenChange(true)}
-        className="fixed bottom-5 right-5 z-30 rounded-full border border-orange-300/35 bg-orange-400/20 p-4 text-orange-100 shadow-[0_10px_40px_-20px_rgba(245,158,11,1)] backdrop-blur-xl lg:hidden"
+        className="fixed bottom-5 right-5 z-30 rounded-full border border-orange-300/35 bg-orange-400/20 p-4 text-orange-100 shadow-[0_10px_40px_-20px_rgba(245,158,11,1)] backdrop-blur-xl"
       >
         <Map className="h-5 w-5" />
       </button>

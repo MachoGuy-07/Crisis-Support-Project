@@ -4,16 +4,25 @@ import { motion } from "framer-motion";
 import L from "leaflet";
 import { AlertTriangle, Cross, Home, PackageCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import {
+  Circle,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+} from "react-leaflet";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { NGO, OrderResult } from "@/types/crisis";
 
-const defaultIconUrl = "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
+const defaultIconUrl =
+  "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
 const defaultIconRetinaUrl =
   "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png";
-const defaultShadowUrl = "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png";
+const defaultShadowUrl =
+  "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png";
 
 L.Icon.Default.mergeOptions({
   iconUrl: defaultIconUrl,
@@ -35,13 +44,7 @@ interface VictimLeafletMapInnerProps {
   }) => OrderResult;
 }
 
-function MapFlyTo({
-  lat,
-  lng,
-}: {
-  lat: number;
-  lng: number;
-}) {
+function MapFlyTo({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
     map.flyTo([lat, lng], map.getZoom(), {
@@ -66,7 +69,9 @@ function NgoPopupOrder({
     requesterEmail: string;
   }) => OrderResult;
 }) {
-  const [supplyType, setSupplyType] = useState<"food" | "medical" | "shelter">("food");
+  const [supplyType, setSupplyType] = useState<"food" | "medical" | "shelter">(
+    "food",
+  );
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState<OrderResult | null>(null);
 
@@ -97,7 +102,7 @@ function NgoPopupOrder({
           Shelter: <span className="font-bold">{ngo.supplies.shelter}</span>
         </div>
       </div>
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <label className="text-xs text-zinc-400">Supply Type</label>
         <select
           value={supplyType}
@@ -110,8 +115,8 @@ function NgoPopupOrder({
           <option value="medical">Medical</option>
           <option value="shelter">Shelter</option>
         </select>
-      </div>
-      <div className="space-y-2">
+      </div> */}
+      {/* <div className="space-y-2">
         <label className="text-xs text-zinc-400">Quantity</label>
         <Input
           type="number"
@@ -121,16 +126,16 @@ function NgoPopupOrder({
           onChange={(event) => setQuantity(Number(event.target.value))}
           className="border-white/20 bg-black/35"
         />
-      </div>
-      <Button
+      </div> */}
+      {/* <Button
         type="button"
         onClick={handleSubmit}
         className="h-9 w-full rounded-lg bg-gradient-to-r from-rose-400 to-pink-300 text-zinc-900"
       >
         <PackageCheck className="mr-2 h-4 w-4" />
         Place Order
-      </Button>
-      {feedback ? (
+      </Button> */}
+      {/* {feedback ? (
         <p
           className={
             feedback.ok
@@ -140,7 +145,7 @@ function NgoPopupOrder({
         >
           {feedback.message}
         </p>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
@@ -227,9 +232,17 @@ export function VictimLeafletMapInner({
         />
 
         {ngos.map((ngo) => (
-          <Marker key={ngo.id} position={[ngo.location.lat, ngo.location.lng]} icon={ngoIcon}>
+          <Marker
+            key={ngo.id}
+            position={[ngo.location.lat, ngo.location.lng]}
+            icon={ngoIcon}
+          >
             <Popup minWidth={280}>
-              <NgoPopupOrder ngo={ngo} email={email} onPlaceOrder={onPlaceOrder} />
+              <NgoPopupOrder
+                ngo={ngo}
+                email={email}
+                onPlaceOrder={onPlaceOrder}
+              />
             </Popup>
           </Marker>
         ))}

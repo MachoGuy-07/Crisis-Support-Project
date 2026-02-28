@@ -12,10 +12,10 @@ import {
 
 import {
   FALLBACK_LOCATION,
-  initialNgos,
   initialRequests,
   initialVolunteerSupply,
 } from "@/mockData/crisisData";
+import { supabase } from "@/lib/supabaseClient";
 import type {
   AcceptResult,
   Coordinates,
@@ -147,7 +147,10 @@ function uniqueLocationNear(base: Coordinates, existing: CrisisRequest[]) {
   }
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
-    const candidate = jitterLocation(FALLBACK_LOCATION, 0.035 + attempt * 0.003);
+    const candidate = jitterLocation(
+      FALLBACK_LOCATION,
+      0.035 + attempt * 0.003,
+    );
     if (isDistinctLocation(candidate, existing)) {
       return candidate;
     }
@@ -162,12 +165,15 @@ function getRequiredSupply(type: SupplyType) {
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [userLocation, setUserLocation] = useState<Coordinates | null>(FALLBACK_LOCATION);
-  const [ngos, setNgos] = useState<NGO[]>(() =>
-    initialNgos.map((ngo) => ({ ...ngo, supplies: { ...ngo.supplies } })),
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(
+    FALLBACK_LOCATION,
   );
+  const [ngos, setNgos] = useState<NGO[]>([]);
   const [requests, setRequests] = useState<CrisisRequest[]>(() =>
-    initialRequests.map((request) => ({ ...request, location: { ...request.location } })),
+    initialRequests.map((request) => ({
+      ...request,
+      location: { ...request.location },
+    })),
   );
   const [volunteerSupply, setVolunteerSupply] = useState<VolunteerSupplyState>({
     ...initialVolunteerSupply,
@@ -189,6 +195,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
       () => undefined,
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 10000 },
     );
+  }, []);
+
+  useEffect(() => {
+    const fetchNgos = async () => {
+      const { data, error } = await supabase.from("ngos").select("*");
+      if (data && !error) {
+        setNgos(
+          data.map((row: any) => ({
+            id: row.id,
+            name: row.name,
+            description: row.description,
+            location: { lat: row.location_lat, lng: row.location_lng },
+            supplies: {
+              food: row.supplies_food,
+              medical: row.supplies_medical,
+              shelter: row.supplies_shelter,
+            },
+            updatedAt: Number(row.updated_at),
+          })),
+        );
+      } else {
+        console.error("Error fetching NGOs:", error);
+      }
+    };
+
+    fetchNgos();
   }, []);
 
   const placeOrder = useCallback(
@@ -226,7 +258,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
                 ...ngo,
                 supplies: {
                   ...ngo.supplies,
-                  [supplyType]: clamp(ngo.supplies[supplyType] - cleanQuantity, 0, 500),
+                  [supplyType]: clamp(
+                    ngo.supplies[supplyType] - cleanQuantity,
+                    0,
+                    500,
+                  ),
                 },
                 updatedAt: Date.now(),
               }
@@ -268,7 +304,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const acceptRequest = useCallback(
     (requestId: string, volunteerEmail: string): AcceptResult => {
-      const targetRequest = requests.find((request) => request.id === requestId);
+      const targetRequest = requests.find(
+        (request) => request.id === requestId,
+      );
       if (!targetRequest) {
         return {
           ok: false,
@@ -279,7 +317,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (!canVolunteerAcceptRequest(targetRequest, volunteerSupply)) {
         return {
           ok: false,
-          message: "Insufficient volunteer supplies or request already accepted.",
+          message:
+            "Insufficient volunteer supplies or request already accepted.",
         };
       }
 
@@ -301,7 +340,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
           if (required === "food") {
             return {
               ...previous,
-              foodAmount: clamp(previous.foodAmount - targetRequest.itemsCount, 0, 2000),
+              foodAmount: clamp(
+                previous.foodAmount - targetRequest.itemsCount,
+                0,
+                2000,
+              ),
             };
           }
           if (required === "medical") {
@@ -334,13 +377,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [requests, volunteerSupply],
   );
 
-  const updateVolunteerSupply = useCallback((updates: Partial<VolunteerSupplyState>) => {
-    setVolunteerSupply((previous) => ({
-      ...previous,
-      ...updates,
-    }));
-    setLastUpdatedAt(Date.now());
-  }, []);
+  const updateVolunteerSupply = useCallback(
+    (updates: Partial<VolunteerSupplyState>) => {
+      setVolunteerSupply((previous) => ({
+        ...previous,
+        ...updates,
+      }));
+      setLastUpdatedAt(Date.now());
+    },
+    [],
+  );
 
   const value = useMemo<DataContextValue>(
     () => ({
