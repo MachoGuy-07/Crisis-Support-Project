@@ -179,7 +179,7 @@ export function RequestCard({
               ) : (
                 <>
                   <AlertCircle className="mr-2 h-4 w-4" />
-                  Insufficient Supplies
+                  Unavailable
                 </>
               )}
             </Button>

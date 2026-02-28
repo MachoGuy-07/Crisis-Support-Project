@@ -99,7 +99,12 @@ export function VolunteerDashboard({
             priority: priorityFromItemsCount(itemsCount),
             supplyType: (req.type as SupplyType) || "other",
             itemsCount,
-            status: req.status === "open" ? "pending" : req.status || "pending",
+            status: (() => {
+              const s = (req.status || "open").toLowerCase().trim();
+              if (s === "pending" || s === "open") return "open";
+              if (s === "accepted" || s === "assigned") return "assigned";
+              return s;
+            })(),
             acceptedBy: req.accepted_by || null,
             createdAt: req.created_at
               ? new Date(req.created_at).getTime()
