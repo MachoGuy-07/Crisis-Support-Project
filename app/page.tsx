@@ -43,8 +43,8 @@ export default function HomePage() {
 
         <p className="mb-10 max-w-2xl text-lg text-zinc-300 md:text-xl">
           Crisis Support connects victims and volunteers in one live command
-          system with geospatial aid tracking, inventory monitoring, and realtime
-          request handling.
+          system with geospatial aid tracking, inventory monitoring, and
+          realtime request handling.
         </p>
 
         <div className="flex w-full flex-col justify-center gap-4 sm:w-auto sm:flex-row">
@@ -53,8 +53,8 @@ export default function HomePage() {
             size="lg"
             className="h-14 w-full rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 px-8 text-base text-zinc-900 shadow-[0_0_45px_rgba(251,113,133,0.45)] transition-all duration-300 hover:scale-105 sm:w-auto"
           >
-            <Link href="/login">
-              Enter Command Center <ArrowRight className="ml-2 h-5 w-5" />
+            <Link href="/register">
+              Create an account <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
           <Button
