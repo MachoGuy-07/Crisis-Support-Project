@@ -13,6 +13,7 @@ import {
   PackageOpen,
   Search,
   Users,
+  User,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -496,7 +497,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
                 key={req.id}
                 className="overflow-hidden border-white/10 bg-black/40 shadow-xl backdrop-blur-md"
               >
-                <CardHeader className="p-4 pb-3">
+                <CardHeader className="p-4 pb-0">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg font-semibold text-white capitalize">
                       {req.type} Need
@@ -522,6 +523,12 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
                     <Users className="h-3.5 w-3.5" />
                     <span>{req.number_of_people} People Affected</span>
                   </div>
+                  {req.accepted_by && (
+                    <div className="flex items-center gap-2 text-xs text-blue-400">
+                      <User className="h-3.5 w-3.5" />
+                      <span>{req.accepted_by}</span>
+                    </div>
+                  )}
                   {req.status === "assigned" && (
                     <Button
                       onClick={() => handleMarkCompleted(req.id)}
