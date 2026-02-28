@@ -4,14 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
-import {
-  Loader2,
-  AlertTriangle,
-  LogOut,
-  MapPin,
-  CheckCircle2,
-} from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { Loader2, AlertTriangle, MapPin, CheckCircle2 } from "lucide-react";
+import Navbar from "@/components/navbar";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +26,6 @@ import { Label } from "@/components/ui/label";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Form state
@@ -53,18 +46,12 @@ export default function DashboardPage() {
       if (!session) {
         router.push("/login");
       } else {
-        setUserEmail(session.user.email ?? "");
         setIsLoading(false);
       }
     };
 
     checkUser();
   }, [router]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
 
   const getLocation = () => {
     setIsGettingLocation(true);
@@ -162,25 +149,7 @@ export default function DashboardPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[120px] pointer-events-none" />
 
-      <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block bg-input/50 px-3 py-1.5 rounded-full border border-border">
-              {userEmail}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className="border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 rounded-xl transition-all"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 container mx-auto px-6 py-10 z-10">
         <div className="flex items-center justify-between mb-8">

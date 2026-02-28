@@ -1,28 +1,71 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 
 export default function Navbar() {
+  const router = useRouter();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session && session.user?.email) {
+        setUserEmail(session.user.email);
+      }
+      setIsLoading(false);
+    };
+
+    checkUser();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
   return (
-    <div>
-      <header className="flex items-center justify-between py-8">
+    <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <Logo />
-        <nav className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            asChild
-            className="hidden sm:inline-flex text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button
-            asChild
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_hsla(var(--primary)/20%)]"
-          >
-            <Link href="/register">Get Started</Link>
-          </Button>
-        </nav>
-      </header>
-    </div>
+        <div className="flex items-center gap-4">
+          {!isLoading && userEmail ? (
+            <>
+              <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block bg-input/50 px-3 py-1.5 rounded-full border border-border">
+                {userEmail}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 rounded-xl transition-all"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </>
+          ) : !isLoading && !userEmail ? (
+            <Link href="/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
+              >
+                Sign In
+              </Button>
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    </header>
   );
 }

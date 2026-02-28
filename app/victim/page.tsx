@@ -12,12 +12,13 @@ import {
   Users,
   MapPin,
 } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 export default function VictimPage() {
   return (
     <div className="min-h-screen bg-[#0E0E11] text-white p-6 md:px-10 lg:px-16 font-sans">
       {/* Header */}
-      <header className="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
+      {/* <header className="flex items-center justify-between pb-6 mb-6 border-b border-white/5">
         <div className="flex items-center gap-3">
           <div className="bg-pink-500/20 p-2 rounded-xl">
             <Heart className="w-5 h-5 text-pink-400 fill-pink-400" />
@@ -35,7 +36,8 @@ export default function VictimPage() {
             Sign Out
           </button>
         </div>
-      </header>
+      </header> */}
+      <Navbar />
 
       {/* Filter Bar */}
       <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
