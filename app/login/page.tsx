@@ -11,12 +11,19 @@ import { clearUserRole, getUserEmail, getUserRole, setUserEmail } from "@/lib/se
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(() => getUserEmail() ?? "");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     const storedEmail = getUserEmail();
     const storedRole = getUserRole();
+
+    if (storedEmail) {
+      // Hydration-safe: read browser storage only after mount.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEmail(storedEmail);
+    }
+
     if (storedEmail && storedRole) {
       router.replace(`/dashboard/${storedRole}`);
     }

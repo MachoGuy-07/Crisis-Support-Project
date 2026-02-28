@@ -1,4 +1,4 @@
-import type { UserRole } from "@/lib/types/dashboard";
+import type { UserRole } from "@/types/crisis";
 
 const EMAIL_KEY = "crisis-support-user-email";
 const ROLE_KEY = "crisis-support-user-role";

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { HandHeart, ShieldAlert } from "lucide-react";
+import { HandHeart, Loader2, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,13 +11,18 @@ import { clearSession, getUserEmail, setUserRole } from "@/lib/session";
 
 export default function RoleSelectPage() {
   const router = useRouter();
-  const [email] = useState(() => getUserEmail() ?? "");
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!email) {
+    const storedEmail = getUserEmail();
+    if (!storedEmail) {
       router.replace("/login");
+      return;
     }
-  }, [email, router]);
+    // Hydration-safe: read browser storage only after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEmail(storedEmail);
+  }, [router]);
 
   const handleRoleChoose = (role: "victim" | "volunteer") => {
     setUserRole(role);
@@ -28,6 +33,14 @@ export default function RoleSelectPage() {
     clearSession();
     router.replace("/login");
   };
+
+  if (!email) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#080808] text-zinc-300">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#080808] px-4 py-10">

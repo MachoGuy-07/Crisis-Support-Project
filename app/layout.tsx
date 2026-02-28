@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Sora } from "next/font/google";
-import "mapbox-gl/dist/mapbox-gl.css";
+import "leaflet/dist/leaflet.css";
+
+import { DataProvider } from "@/context/DataContext";
 import "./globals.css";
 
 const sora = Sora({
@@ -27,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${sora.variable} ${dmSans.variable} min-h-screen`}>
-        {children}
+        <DataProvider>{children}</DataProvider>
       </body>
     </html>
   );
