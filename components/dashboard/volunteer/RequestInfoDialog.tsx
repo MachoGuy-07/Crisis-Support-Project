@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CheckCircle2,
   HeartPulse,
   Home,
   MapPin,
@@ -64,8 +65,10 @@ export function RequestInfoDialog({
   onAccept,
 }: RequestInfoDialogProps) {
   const approved = request.status === "assigned";
+  const closed = request.status === "closed";
   const approvedClasses =
     "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
+  const closedClasses = "border-zinc-500/35 bg-zinc-500/15 text-zinc-300";
   const acceptClasses =
     request.priority === "red"
       ? "border-red-300/35 bg-red-500/15 text-red-100 hover:bg-red-500/22"
@@ -107,7 +110,14 @@ export function RequestInfoDialog({
                   <MapPin className="mr-2 h-4 w-4 shrink-0 text-amber-300" />
                   <span className="leading-none">{locationLabel(request)}</span>
                 </p>
-                {approved ? (
+                {closed ? (
+                  <span
+                    className={`inline-flex h-10 items-center rounded-xl border px-3 text-sm font-medium sm:text-base ${closedClasses}`}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Request Closed
+                  </span>
+                ) : approved ? (
                   <span
                     className={`inline-flex h-10 items-center rounded-xl border px-3 text-sm font-medium sm:text-base ${approvedClasses}`}
                   >

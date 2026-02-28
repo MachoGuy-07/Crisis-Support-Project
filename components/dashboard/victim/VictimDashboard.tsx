@@ -75,6 +75,71 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Victim's personal requests
+  const [userRequests, setUserRequests] = useState<any[]>([]);
+
+  const fetchUserRequests = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) return;
+
+    const { data, error } = await supabase
+      .from("requests")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching user requests:", error);
+    } else if (data) {
+      setUserRequests(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserRequests();
+
+    // Listen for changes on user's requests only
+    let subscription: any = null;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return;
+
+      subscription = supabase
+        .channel("victim-requests-changes")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "requests",
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          () => {
+            fetchUserRequests();
+          },
+        )
+        .subscribe();
+    });
+
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
+  }, []);
+
+  // Add polling for robustness
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchUserRequests();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     radiusSpring.set(radiusKm);
   }, [radiusKm, radiusSpring]);
@@ -232,6 +297,9 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       setReportDescription("");
       setNumberOfPeople(1);
       setLocation(null);
+
+      // Refresh user requests so the new record appears instantly
+      fetchUserRequests();
     } catch (error: unknown) {
       console.error("Error submitting report:", error);
       const errorMessage =
@@ -239,6 +307,21 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleMarkCompleted = async (requestId: string) => {
+    const { error } = await supabase
+      .from("requests")
+      .update({ status: "closed" })
+      .eq("id", requestId);
+
+    if (error) {
+      console.error("Error marking request as closed:", error);
+      alert("Failed to mark request as closed. Please try again.");
+    } else {
+      setStatusMessage("Request marked as completed!");
+      fetchUserRequests();
     }
   };
 
@@ -399,6 +482,63 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
         </div>
       </motion.section>
 
+      {userRequests.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-white">Your Requests</h3>
+            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-zinc-300">
+              {userRequests.length} Total
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {userRequests.map((req) => (
+              <Card
+                key={req.id}
+                className="overflow-hidden border-white/10 bg-black/40 shadow-xl backdrop-blur-md"
+              >
+                <CardHeader className="p-4 pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-semibold text-white capitalize">
+                      {req.type} Need
+                    </CardTitle>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
+                        req.status === "open"
+                          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/20"
+                          : req.status === "assigned"
+                            ? "bg-blue-500/15 text-blue-300 border border-blue-500/20"
+                            : "bg-zinc-500/15 text-zinc-300 border border-zinc-500/20"
+                      }`}
+                    >
+                      {req.status}
+                    </span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3 p-4 pt-0">
+                  <p className="text-sm text-zinc-400 line-clamp-2">
+                    {req.description}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Users className="h-3.5 w-3.5" />
+                    <span>{req.number_of_people} People Affected</span>
+                  </div>
+                  {req.status === "assigned" && (
+                    <Button
+                      onClick={() => handleMarkCompleted(req.id)}
+                      className="mt-2 w-full bg-blue-600 hover:bg-blue-500 text-white"
+                      size="sm"
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Mark as Completed
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-3 backdrop-blur-xl sm:p-4">
         <VictimLeafletMap
           userLocation={center}
@@ -540,8 +680,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
 
       <section className="rounded-3xl border border-rose-300/20 bg-rose-500/5 p-4 text-sm text-zinc-300">
         <PackageOpen className="mr-2 inline h-4 w-4 text-rose-200" />
-        Click any NGO marker on the map to select supply type, enter quantity,
-        and place an order instantly.
+        Click any NGO marker on the map to look at the supply.
       </section>
     </div>
   );
