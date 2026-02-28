@@ -39,11 +39,13 @@ function locationLabel(request: CrisisRequest) {
 }
 
 function requestTypeIcon(request: CrisisRequest) {
-  if (request.supplyType === "food") return <Sandwich className="h-8 w-8 text-sky-300" />;
+  if (request.supplyType === "food")
+    return <Sandwich className="h-8 w-8 text-sky-300" />;
   if (request.supplyType === "medical") {
     return <HeartPulse className="h-8 w-8 text-sky-300" />;
   }
-  if (request.supplyType === "shelter") return <Home className="h-8 w-8 text-sky-300" />;
+  if (request.supplyType === "shelter")
+    return <Home className="h-8 w-8 text-sky-300" />;
   return <Package className="h-8 w-8 text-sky-300" />;
 }
 
@@ -61,8 +63,9 @@ export function RequestInfoDialog({
   canAccept,
   onAccept,
 }: RequestInfoDialogProps) {
-  const approved = request.status === "accepted";
-  const approvedClasses = "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
+  const approved = request.status === "assigned";
+  const approvedClasses =
+    "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
   const acceptClasses =
     request.priority === "red"
       ? "border-red-300/35 bg-red-500/15 text-red-100 hover:bg-red-500/22"
@@ -77,8 +80,12 @@ export function RequestInfoDialog({
           <div className="space-y-4">
             <DialogHeader className="space-y-2 text-left">
               <DialogTitle className="text-2xl font-semibold tracking-tight text-zinc-100 sm:text-[2rem]">
-                <span className="mr-3 inline-flex align-middle">{requestTypeIcon(request)}</span>
-                <span className="align-middle">{requestTypeLabel(request)}</span>
+                <span className="mr-3 inline-flex align-middle">
+                  {requestTypeIcon(request)}
+                </span>
+                <span className="align-middle">
+                  {requestTypeLabel(request)}
+                </span>
               </DialogTitle>
               <DialogDescription className="text-sm text-zinc-400 sm:text-base">
                 Request details and location snapshot.
@@ -118,7 +125,7 @@ export function RequestInfoDialog({
                     className={`inline-flex h-10 items-center rounded-xl border px-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:border-zinc-500/35 disabled:bg-zinc-600/20 disabled:text-zinc-400 sm:text-base ${acceptClasses}`}
                   >
                     <ShieldAlert className="mr-2 h-4 w-4" />
-                    {canAccept ? "Accept Request" : "Insufficient Supplies"}
+                    {canAccept ? "Accept Request" : "Location Unavailable"}
                   </button>
                 )}
               </div>

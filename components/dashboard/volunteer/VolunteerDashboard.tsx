@@ -42,8 +42,8 @@ const priorityRank = {
 };
 
 function priorityFromItemsCount(itemsCount: number): RequestPriority {
-  if (itemsCount > 30) return "red";
-  if (itemsCount >= 6) return "orange";
+  if (itemsCount > 6) return "red";
+  if (itemsCount > 2) return "orange";
   return "green";
 }
 
@@ -99,7 +99,7 @@ export function VolunteerDashboard({
             priority: priorityFromItemsCount(itemsCount),
             supplyType: (req.type as SupplyType) || "other",
             itemsCount,
-            status: req.status || "pending",
+            status: req.status === "open" ? "pending" : req.status || "pending",
             acceptedBy: req.accepted_by || null,
             createdAt: req.created_at
               ? new Date(req.created_at).getTime()
@@ -147,7 +147,7 @@ export function VolunteerDashboard({
 
   const prioritizedRequests = useMemo(() => {
     return [...filteredRequests].sort((a, b) => {
-      if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
+      if (a.status !== b.status) return a.status === "open" ? -1 : 1;
       if (a.priority !== b.priority)
         return priorityRank[a.priority] - priorityRank[b.priority];
       return b.createdAt - a.createdAt;
@@ -160,14 +160,11 @@ export function VolunteerDashboard({
   );
 
   const handleAccept = async (request: CrisisRequest) => {
-    // Call the original context to decrease volunteer supply correctly locally
-    acceptRequest(request.id, email);
-
     // Update local state right away for visual feedback
     setDbRequests((prev) =>
       prev.map((r) =>
         r.id === request.id
-          ? { ...r, status: "accepted", acceptedBy: email }
+          ? { ...r, status: "assigned", acceptedBy: email }
           : r,
       ),
     );
@@ -175,11 +172,17 @@ export function VolunteerDashboard({
     // Update the database
     const { error } = await supabase
       .from("requests")
-      .update({ status: "accepted", accepted_by: email })
+      .update({ status: "assigned", accepted_by: email })
       .eq("id", request.id);
 
     if (error) {
       console.error("Error accepting request in Supabase: ", error);
+      // Revert if failed
+      setDbRequests((prev) =>
+        prev.map((r) =>
+          r.id === request.id ? { ...r, status: "open", acceptedBy: null } : r,
+        ),
+      );
     }
   };
 

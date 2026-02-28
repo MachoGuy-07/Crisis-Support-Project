@@ -68,11 +68,13 @@ function requestTypeLabel(request: CrisisRequest) {
 }
 
 function requestTypeIcon(request: CrisisRequest) {
-  if (request.supplyType === "food") return <Sandwich className="h-6 w-6 text-sky-200" />;
+  if (request.supplyType === "food")
+    return <Sandwich className="h-6 w-6 text-sky-200" />;
   if (request.supplyType === "medical") {
     return <HeartPulse className="h-6 w-6 text-sky-200" />;
   }
-  if (request.supplyType === "shelter") return <Home className="h-6 w-6 text-sky-200" />;
+  if (request.supplyType === "shelter")
+    return <Home className="h-6 w-6 text-sky-200" />;
   return <Package className="h-6 w-6 text-sky-200" />;
 }
 
@@ -81,10 +83,14 @@ function locationLabel(request: CrisisRequest) {
   return `${request.location.lat.toFixed(4)}, ${request.location.lng.toFixed(4)}`;
 }
 
-export function RequestCard({ request, canAccept, onAccept }: RequestCardProps) {
+export function RequestCard({
+  request,
+  canAccept,
+  onAccept,
+}: RequestCardProps) {
   const [infoOpen, setInfoOpen] = useState(false);
   const tone = priorityTone(request.priority);
-  const accepted = request.status === "accepted";
+  const accepted = request.status === "assigned";
 
   return (
     <>
@@ -139,7 +145,7 @@ export function RequestCard({ request, canAccept, onAccept }: RequestCardProps) 
                     : "border-amber-300/35 bg-amber-500/12 text-amber-100"
                 }`}
               >
-                {accepted ? "Accepted" : "Pending"}
+                {accepted ? "Assigned" : "Open"}
               </span>
               <Button
                 type="button"

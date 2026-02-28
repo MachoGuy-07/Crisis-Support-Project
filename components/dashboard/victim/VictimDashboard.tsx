@@ -136,8 +136,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   }, [filteredNgos]);
 
   const volunteersReady = useMemo(
-    () =>
-      requests.filter((request) => request.status === "pending").length + 18,
+    () => requests.filter((request) => request.status === "open").length + 18,
     [requests],
   );
 

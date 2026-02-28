@@ -284,7 +284,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           priority: priorityFromItemsCount(cleanQuantity),
           supplyType,
           itemsCount: cleanQuantity,
-          status: "pending",
+          status: "open",
           acceptedBy: null,
           createdAt,
         };
@@ -327,7 +327,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           request.id === requestId
             ? {
                 ...request,
-                status: "accepted",
+                status: "assigned",
                 acceptedBy: volunteerEmail,
               }
             : request,

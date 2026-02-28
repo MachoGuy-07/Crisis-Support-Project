@@ -8,7 +8,7 @@ export type RequestPriority = "red" | "orange" | "green";
 
 export type RequestLoad = "heavy" | "medium" | "light";
 
-export type RequestStatus = "pending" | "accepted";
+export type RequestStatus = "open" | "assigned" | "closed";
 
 export interface Coordinates {
   lat: number;

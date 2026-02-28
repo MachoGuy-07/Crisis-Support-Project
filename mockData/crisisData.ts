@@ -142,7 +142,7 @@ export const initialRequests: CrisisRequest[] = requestSeedData.map((request) =>
     priority: request.priority,
     supplyType: request.supplyType,
     itemsCount: request.itemsCount,
-    status: "pending",
+    status: "open",
     acceptedBy: null,
     createdAt: Date.now() - request.ageMinutes * 60 * 1000,
   };
