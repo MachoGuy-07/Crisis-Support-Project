@@ -22,18 +22,10 @@ import { AnimatedStatCard } from "@/components/dashboard/shared/AnimatedStatCard
 import { VictimLeafletMap } from "@/components/maps/VictimLeafletMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDataContext } from "@/context/DataContext";
 import { FALLBACK_LOCATION } from "@/mockData/crisisData";
-import type { NGO, UrgencyLevel } from "@/types/crisis";
+import type { NGO } from "@/types/crisis";
 import { distanceInKm, isWithinRadius } from "@/utils/geo";
-import { getUrgencyPalette } from "@/utils/requests";
 
 interface VictimDashboardProps {
   email: string;
@@ -43,8 +35,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
   const { ngos, requests, placeOrder, userLocation } = useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
-  const [radiusKm, setRadiusKm] = useState(28);
-  const [urgency, setUrgency] = useState<UrgencyLevel>("moderate");
+  const [radiusKm, setRadiusKm] = useState(65);
   const [searchText, setSearchText] = useState("");
   const [scanActive, setScanActive] = useState(false);
   const [pulseScale, setPulseScale] = useState(1.08);
@@ -119,10 +110,8 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
     [requests],
   );
 
-  const urgencyPalette = getUrgencyPalette(urgency);
-
   const handleOrder = (ngo: NGO) => {
-    setStatusMessage(`${ngo.name} supply updated in realtime.`);
+    setStatusMessage(`${ngo.name} supply updated successfully.`);
   };
 
   const handleRadiusChange = (nextRadius: number) => {
@@ -141,9 +130,9 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       <motion.section
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-3xl border bg-white/[0.045] p-4 backdrop-blur-2xl sm:p-5 ${urgencyPalette.border} ${urgencyPalette.glow}`}
+        className="rounded-3xl border border-orange-300/25 bg-white/[0.045] p-4 backdrop-blur-2xl shadow-[0_20px_70px_-40px_rgba(245,158,11,0.75)] sm:p-5"
       >
-        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[260px_220px_1fr]">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[260px_1fr]">
           <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
               Radius
@@ -157,24 +146,6 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
               className="w-full accent-rose-300"
             />
             <p className="mt-2 text-sm font-semibold text-zinc-200">{radiusKm} km</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Urgency
-            </p>
-            <Select
-              value={urgency}
-              onValueChange={(value) => setUrgency(value as UrgencyLevel)}
-            >
-              <SelectTrigger className="h-10 w-full border-white/20 bg-black/40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Green (Low)</SelectItem>
-                <SelectItem value="moderate">Orange (Medium)</SelectItem>
-                <SelectItem value="critical">Red (Critical)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -198,7 +169,6 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
           userLocation={center}
           ngos={filteredNgos}
           radiusKm={animatedRadiusKm}
-          urgency={urgency}
           pulseScale={pulseScale}
           email={email}
           onPlaceOrder={(payload) => {
@@ -265,10 +235,10 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       </section>
 
       <section className="space-y-3">
-        <h3 className="text-2xl font-bold text-white">Live Supply Monitoring</h3>
+        <h3 className="text-2xl font-bold text-white">Supply Monitoring</h3>
         <p className="text-sm text-zinc-400">
-          Showing {filteredNgos.length} relief centers within {radiusKm} km. Inventory
-          is refreshed in realtime for Hyderabad and Secunderabad.
+          Showing {filteredNgos.length} relief centers within {radiusKm} km. Using a
+          fixed inventory snapshot for Hyderabad and Secunderabad.
         </p>
         <div className="columns-1 gap-4 md:columns-2 xl:columns-3">
           {filteredNgos.map((ngo, index) => (

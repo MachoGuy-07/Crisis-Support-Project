@@ -11,7 +11,6 @@ import {
 } from "react";
 
 import {
-  CITY_RELIEF_POINTS,
   FALLBACK_LOCATION,
   initialNgos,
   initialRequests,
@@ -94,16 +93,14 @@ const requestFollowupTemplates = [
   "Support is needed before the next weather-impact window.",
 ] as const;
 
+const MAX_REQUESTS = 18;
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function randomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function randomChoice<T>(values: readonly T[]): T {
-  return values[randomInt(0, values.length - 1)];
+  return values[Math.floor(Math.random() * values.length)];
 }
 
 function priorityFromItemsCount(itemsCount: number): RequestPriority {
@@ -159,23 +156,6 @@ function uniqueLocationNear(base: Coordinates, existing: CrisisRequest[]) {
   return jitterLocation(base, 0.02);
 }
 
-function pickUniqueArea(existing: CrisisRequest[]) {
-  const usedAreas = new Set(
-    existing
-      .map((request) => request.areaName)
-      .filter((areaName): areaName is string => Boolean(areaName)),
-  );
-  const shuffled = [...CITY_RELIEF_POINTS].sort(() => Math.random() - 0.5);
-
-  const availablePoint = shuffled.find((point) => !usedAreas.has(point.name));
-  const selectedPoint = availablePoint ?? randomChoice(shuffled);
-
-  return {
-    areaName: selectedPoint.name,
-    baseLocation: { lat: selectedPoint.lat, lng: selectedPoint.lng },
-  };
-}
-
 function getRequiredSupply(type: SupplyType) {
   if (type === "food" || type === "medical" || type === "shelter") return type;
   return null;
@@ -210,72 +190,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 10000 },
     );
   }, []);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNgos((previous) =>
-        previous.map((ngo) => ({
-          ...ngo,
-          supplies: {
-            food: clamp(ngo.supplies.food + randomInt(-8, 12), 0, 500),
-            medical: clamp(ngo.supplies.medical + randomInt(-6, 9), 0, 420),
-            shelter: clamp(ngo.supplies.shelter + randomInt(-5, 7), 0, 320),
-          },
-          updatedAt: Date.now(),
-        })),
-      );
-
-      setRequests((previous) => {
-        const withAgingPressure = previous.map((request) => {
-          if (request.status !== "pending") return request;
-          if (Math.random() > 0.2) return request;
-
-          const addedItems = randomInt(1, 4);
-          const nextItems = clamp(request.itemsCount + addedItems, 1, 120);
-          return {
-            ...request,
-            itemsCount: nextItems,
-            priority: priorityFromItemsCount(nextItems),
-          };
-        });
-
-        if (Math.random() > 0.43) return withAgingPressure;
-
-        const supplyType = randomChoice<SupplyType>([
-          "food",
-          "medical",
-          "shelter",
-          "other",
-        ]);
-        const itemsCount = randomInt(3, 45);
-        const createdAt = Date.now();
-        const area = pickUniqueArea(withAgingPressure);
-        const location = uniqueLocationNear(area.baseLocation, withAgingPressure);
-
-        const liveRequest: CrisisRequest = {
-          id: `live-${createdAt}`,
-          title: nextRequestTitle(supplyType, area.areaName),
-          description: composeRequestDescription(supplyType, area.areaName, itemsCount),
-          areaName: area.areaName,
-          location,
-          priority: priorityFromItemsCount(itemsCount),
-          supplyType,
-          itemsCount,
-          status: "pending",
-          acceptedBy: null,
-          createdAt,
-        };
-
-        return [liveRequest, ...withAgingPressure].slice(0, 60);
-      });
-
-      setLastUpdatedAt(Date.now());
-    }, 8000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [userLocation]);
 
   const placeOrder = useCallback(
     (payload: OrderPayload): OrderResult => {
@@ -339,7 +253,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           createdAt,
         };
 
-        return [nextRequest, ...previous].slice(0, 60);
+        return [nextRequest, ...previous].slice(0, MAX_REQUESTS);
       });
 
       setLastUpdatedAt(createdAt);

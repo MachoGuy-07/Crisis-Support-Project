@@ -8,8 +8,7 @@ import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from "react-le
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { NGO, OrderResult, UrgencyLevel } from "@/types/crisis";
-import { getUrgencyPalette } from "@/utils/requests";
+import type { NGO, OrderResult } from "@/types/crisis";
 
 const defaultIconUrl = "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png";
 const defaultIconRetinaUrl =
@@ -26,7 +25,6 @@ interface VictimLeafletMapInnerProps {
   userLocation: { lat: number; lng: number };
   ngos: NGO[];
   radiusKm: number;
-  urgency: UrgencyLevel;
   pulseScale: number;
   email: string;
   onPlaceOrder: (payload: {
@@ -151,13 +149,10 @@ export function VictimLeafletMapInner({
   userLocation,
   ngos,
   radiusKm,
-  urgency,
   pulseScale,
   email,
   onPlaceOrder,
 }: VictimLeafletMapInnerProps) {
-  const urgencyPalette = getUrgencyPalette(urgency);
-
   const userIcon = useMemo(
     () =>
       L.divIcon({
@@ -212,8 +207,8 @@ export function VictimLeafletMapInner({
           center={[userLocation.lat, userLocation.lng]}
           radius={radiusKm * 1000}
           pathOptions={{
-            color: urgencyPalette.color,
-            fillColor: urgencyPalette.color,
+            color: "#f59e0b",
+            fillColor: "#f59e0b",
             fillOpacity: 0.12,
             weight: 2.5,
           }}
@@ -223,8 +218,8 @@ export function VictimLeafletMapInner({
           center={[userLocation.lat, userLocation.lng]}
           radius={radiusKm * 1000 * pulseScale}
           pathOptions={{
-            color: urgencyPalette.color,
-            fillColor: urgencyPalette.color,
+            color: "#f59e0b",
+            fillColor: "#f59e0b",
             fillOpacity: 0.04,
             opacity: 0.45,
             weight: 1.5,
