@@ -86,41 +86,42 @@ export function RequestInfoDialog({
             </DialogHeader>
 
             <div className="space-y-3 text-zinc-200">
-              <p className="text-2xl font-medium text-zinc-100 sm:text-3xl">
-                <Users className="mr-2 inline h-6 w-6 text-zinc-400" />
+              <p className="text-base font-medium text-zinc-100 sm:text-lg -mt-4">
+                <Users className="mr-2 inline h-4 w-4 text-zinc-400" />
                 {request.itemsCount} people
               </p>
 
-              <p className="max-w-5xl text-base leading-[1.45] text-zinc-200 sm:text-lg">
+              <p className="max-w-5xl text-base leading-[1.45] text-zinc-400 sm:text-lg">
                 {request.description}
               </p>
 
-              <p className="text-xl font-medium text-zinc-100 sm:text-2xl">
-                <MapPin className="mr-2 inline h-6 w-6 text-amber-300" />
-                {locationLabel(request)}
-              </p>
-
-              {approved ? (
-                <span
-                  className={`inline-flex items-center rounded-xl border px-4 py-2 text-base font-medium ${approvedClasses}`}
-                >
-                  <ShieldAlert className="mr-2 h-5 w-5" />
-                  Request Approved
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  disabled={!canAccept}
-                  onClick={() => {
-                    onAccept();
-                    onOpenChange(false);
-                  }}
-                  className={`inline-flex items-center rounded-xl border px-4 py-2 text-base font-medium transition disabled:cursor-not-allowed disabled:border-zinc-500/35 disabled:bg-zinc-600/20 disabled:text-zinc-400 ${acceptClasses}`}
-                >
-                  <ShieldAlert className="mr-2 h-5 w-5" />
-                  {canAccept ? "Accept Request" : "Insufficient Supplies"}
-                </button>
-              )}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <p className="inline-flex h-10 items-center text-sm font-medium text-zinc-100 sm:text-base">
+                  <MapPin className="mr-2 h-4 w-4 shrink-0 text-amber-300" />
+                  <span className="leading-none">{locationLabel(request)}</span>
+                </p>
+                {approved ? (
+                  <span
+                    className={`inline-flex h-10 items-center rounded-xl border px-3 text-sm font-medium sm:text-base ${approvedClasses}`}
+                  >
+                    <ShieldAlert className="mr-2 h-4 w-4" />
+                    Request Approved
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!canAccept}
+                    onClick={() => {
+                      onAccept();
+                      onOpenChange(false);
+                    }}
+                    className={`inline-flex h-10 items-center rounded-xl border px-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:border-zinc-500/35 disabled:bg-zinc-600/20 disabled:text-zinc-400 sm:text-base ${acceptClasses}`}
+                  >
+                    <ShieldAlert className="mr-2 h-4 w-4" />
+                    {canAccept ? "Accept Request" : "Insufficient Supplies"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
