@@ -2,28 +2,12 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import Navbar from "@/components/navbar";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen overflow-hidden container mx-auto px-6">
-      <header className="flex items-center justify-between py-8">
-        <Logo />
-        <nav className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            asChild
-            className="hidden sm:inline-flex text-muted-foreground hover:text-foreground"
-          >
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button
-            asChild
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_hsla(var(--primary)/20%)]"
-          >
-            <Link href="/register">Get Started</Link>
-          </Button>
-        </nav>
-      </header>
+      <Navbar />
 
       <main className="flex-1 flex flex-col justify-center items-center text-center max-w-4xl mx-auto py-20 px-4 z-10 animate-fade-in relative">
         <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
