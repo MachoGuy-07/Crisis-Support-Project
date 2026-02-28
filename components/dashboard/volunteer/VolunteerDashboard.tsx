@@ -1,15 +1,20 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Map, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { RequestCard } from "@/components/dashboard/volunteer/RequestCard";
 import { VolunteerMapDialog } from "@/components/dashboard/volunteer/VolunteerMapDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDataContext } from "@/context/DataContext";
+import { supabase } from "@/lib/supabaseClient";
 import { FALLBACK_LOCATION } from "@/mockData/crisisData";
-import type { CrisisRequest } from "@/types/crisis";
+import type {
+  CrisisRequest,
+  RequestPriority,
+  SupplyType,
+} from "@/types/crisis";
 import { canVolunteerAcceptRequest } from "@/utils/requests";
 
 interface VolunteerDashboardProps {
@@ -36,22 +41,95 @@ const priorityRank = {
   green: 2,
 };
 
+function priorityFromItemsCount(itemsCount: number): RequestPriority {
+  if (itemsCount > 30) return "red";
+  if (itemsCount >= 6) return "orange";
+  return "green";
+}
+
 export function VolunteerDashboard({
   email,
   mapOpen,
   onMapOpenChange,
 }: VolunteerDashboardProps) {
-  const { requests, volunteerSupply, acceptRequest, userLocation } =
-    useDataContext();
+  const { volunteerSupply, acceptRequest, userLocation } = useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
+  const [dbRequests, setDbRequests] = useState<CrisisRequest[]>([]);
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [otherQuery, setOtherQuery] = useState("");
   const visibleLimit = 9;
 
+  useEffect(() => {
+    const fetchRequests = async () => {
+      const { data, error } = await supabase
+        .from("requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching requests: ", error);
+        return;
+      }
+
+      if (data) {
+        const parsedRequests: CrisisRequest[] = data.map((req: any) => {
+          let lat = FALLBACK_LOCATION.lat;
+          let lng = FALLBACK_LOCATION.lng;
+
+          if (
+            typeof req.location === "string" &&
+            req.location.startsWith("POINT")
+          ) {
+            const match = req.location.match(/\(([^ ]+) ([^)]+)\)/);
+            if (match) {
+              lng = parseFloat(match[1]);
+              lat = parseFloat(match[2]);
+            }
+          }
+
+          const itemsCount = req.number_of_people || 1;
+
+          return {
+            id: req.id.toString(),
+            title: `${req.type.charAt(0).toUpperCase() + req.type.slice(1)} Request Support`,
+            description: req.description || "No description provided.",
+            location: { lat, lng },
+            priority: priorityFromItemsCount(itemsCount),
+            supplyType: (req.type as SupplyType) || "other",
+            itemsCount,
+            status: req.status || "pending",
+            acceptedBy: req.accepted_by || null,
+            createdAt: req.created_at
+              ? new Date(req.created_at).getTime()
+              : Date.now(),
+          };
+        });
+        setDbRequests(parsedRequests);
+      }
+    };
+
+    fetchRequests();
+
+    const subscription = supabase
+      .channel("volunteer-requests-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "requests" },
+        () => {
+          fetchRequests();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const filteredRequests = useMemo(() => {
-    return requests.filter((request) => {
+    return dbRequests.filter((request) => {
       if (filterType === "all") return true;
       if (filterType === "other") {
         if (request.supplyType !== "other") return false;
@@ -65,7 +143,7 @@ export function VolunteerDashboard({
       }
       return request.supplyType === filterType;
     });
-  }, [filterType, otherQuery, requests]);
+  }, [filterType, otherQuery, dbRequests]);
 
   const prioritizedRequests = useMemo(() => {
     return [...filteredRequests].sort((a, b) => {
@@ -81,8 +159,28 @@ export function VolunteerDashboard({
     [prioritizedRequests],
   );
 
-  const handleAccept = (request: CrisisRequest) => {
+  const handleAccept = async (request: CrisisRequest) => {
+    // Call the original context to decrease volunteer supply correctly locally
     acceptRequest(request.id, email);
+
+    // Update local state right away for visual feedback
+    setDbRequests((prev) =>
+      prev.map((r) =>
+        r.id === request.id
+          ? { ...r, status: "accepted", acceptedBy: email }
+          : r,
+      ),
+    );
+
+    // Update the database
+    const { error } = await supabase
+      .from("requests")
+      .update({ status: "accepted", accepted_by: email })
+      .eq("id", request.id);
+
+    if (error) {
+      console.error("Error accepting request in Supabase: ", error);
+    }
   };
 
   return (

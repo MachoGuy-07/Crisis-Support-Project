@@ -60,14 +60,19 @@ const RequestIcon = () => (
 export default function AccountPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("user");
+
+  // User Profile States
+  const [displayName, setDisplayName] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+
+  // Settings & Location States
   const [radius, setRadius] = useState(10);
-  const [smsEnabled, setSmsEnabled] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState(false);
   const [location, setLocation] = useState<any>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
   const [requestHistory, setRequestHistory] = useState<any[]>([]);
 
@@ -85,10 +90,12 @@ export default function AccountPage() {
       if (session?.user) {
         setUserEmail(session.user.email ?? null);
         const meta = session.user.user_metadata;
-        setPhone(meta?.phone || "");
+
+        // Load fields safely
+        setDisplayName(meta?.full_name || meta?.displayName || "");
+        // setPhone(loadedPhone || meta?.phone || "");
         setAddress(meta?.address || "");
         setRadius(meta?.radius || 10);
-        setSmsEnabled(meta?.smsEnabled || false);
         setEmailEnabled(meta?.emailEnabled || false);
         setLocation(meta?.homeLocation || null);
 
@@ -100,7 +107,6 @@ export default function AccountPage() {
           .order("created_at", { ascending: false });
 
         if (requests && !error) {
-          // Format the data to match the UI expectations, mapped strictly to your DB columns
           const formattedRequests = requests.map((req: any) => ({
             id: req.id,
             type: req.type || "Service",
@@ -152,10 +158,32 @@ export default function AccountPage() {
   };
 
   const handleSaveProfile = async () => {
-    await supabase.auth.updateUser({
-      data: { phone, address, homeLocation: location },
-    });
-    alert("Profile updated ✅");
+    try {
+      // Supabase requires the E.164 format (with country code) for the official phone column
+      // const formattedPhone = phone && phone.trim() !== "" ? (phone.startsWith('+') ? phone : `+91${phone}`) : undefined;
+
+      const { error } = await supabase.auth.updateUser({
+        // 1. This updates the OFFICIAL Auth Phone column in your dashboard
+        // phone: formattedPhone,
+
+        data: {
+          // 2. 'full_name' updates the OFFICIAL Display Name column
+          full_name: displayName,
+          displayName: displayName,
+          phone: phone, // Backup in metadata
+          address: address,
+          homeLocation: location,
+        },
+      });
+
+      if (error) throw error;
+
+      await supabase.auth.refreshSession();
+      alert("Profile updated successfully ✅");
+    } catch (error: any) {
+      console.error("Error updating profile:", error.message);
+      alert("Failed to save profile: " + error.message);
+    }
   };
 
   if (isLoading)
@@ -210,26 +238,38 @@ export default function AccountPage() {
               <div className="space-y-6">
                 <div className="group">
                   <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block ml-1">
+                    Display Name
+                  </label>
+                  <input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full p-4 bg-[#1A1A1A] border border-zinc-800 rounded-2xl focus:border-pink-500 outline-none transition-all text-white"
+                  />
+                </div>
+
+                <div className="group">
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block ml-1">
                     Email Address
                   </label>
                   <input
                     disabled
                     value={userEmail || ""}
                     className="w-full p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-zinc-500 cursor-not-allowed"
+                    title="Email cannot be changed directly"
                   />
                 </div>
 
-                <div className="group">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block ml-1">
-                    Phone Number
-                  </label>
-                  <input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Enter phone number"
-                    className="w-full p-4 bg-[#1A1A1A] border border-zinc-800 rounded-2xl focus:border-pink-500 outline-none transition-all text-white"
+                {/* <div className="group">
+                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block ml-1">Phone Number</label>
+                  <input 
+                    value={phone} 
+                    onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="Enter 10-digit number"
+                    maxLength={10}
+                    className="w-full p-4 bg-[#1A1A1A] border border-zinc-800 rounded-2xl focus:border-pink-500 outline-none transition-all text-white" 
                   />
-                </div>
+                </div> */}
 
                 <div className="group">
                   <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 block ml-1">
@@ -279,18 +319,6 @@ export default function AccountPage() {
                 <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 space-y-4">
                   <label className="flex items-center justify-between cursor-pointer group">
                     <span className="text-zinc-300 font-medium">
-                      SMS Notifications
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={smsEnabled}
-                      onChange={() => setSmsEnabled(!smsEnabled)}
-                      className="w-5 h-5 accent-pink-500"
-                    />
-                  </label>
-                  <div className="h-px bg-zinc-800 w-full" />
-                  <label className="flex items-center justify-between cursor-pointer group">
-                    <span className="text-zinc-300 font-medium">
                       Email Alerts
                     </span>
                     <input
@@ -323,7 +351,12 @@ export default function AccountPage() {
                 </div>
 
                 <button
-                  onClick={() => alert("Settings Saved")}
+                  onClick={async () => {
+                    await supabase.auth.updateUser({
+                      data: { radius, emailEnabled },
+                    });
+                    alert("Settings Saved ✅");
+                  }}
                   className="w-full py-4 rounded-2xl bg-zinc-100 text-black font-bold hover:bg-white transition-all"
                 >
                   Update Preferences
@@ -347,11 +380,9 @@ export default function AccountPage() {
                       className="bg-[#1A1A1A] p-5 rounded-2xl border border-zinc-800 flex justify-between items-center group hover:border-zinc-700 transition-all"
                     >
                       <div>
-                        {/* Render the 'type' (e.g., rescue, food) with capitalization */}
                         <h4 className="font-semibold text-zinc-100 mb-1 capitalize text-lg">
                           {req.type}
                         </h4>
-                        {/* Render the 'description' */}
                         <p className="text-sm text-zinc-400 mb-2">
                           {req.description}
                         </p>
