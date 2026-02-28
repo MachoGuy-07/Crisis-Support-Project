@@ -127,11 +127,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
 
   return (
     <div className="space-y-5">
-      <motion.section
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl border border-orange-300/25 bg-white/[0.045] p-4 backdrop-blur-2xl shadow-[0_20px_70px_-40px_rgba(245,158,11,0.75)] sm:p-5"
-      >
+      <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[260px_1fr]">
           <div className="rounded-2xl border border-white/10 bg-black/35 p-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
@@ -249,36 +245,39 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
               transition={{ delay: index * 0.05 }}
               className="mb-4 break-inside-avoid"
             >
-              <Card className="border-white/12 bg-gradient-to-br from-[#0f0f12] to-[#0a0a0d] py-0 backdrop-blur-xl">
-                <CardHeader className="space-y-2 pb-2">
-                  <CardTitle className="flex items-center justify-between gap-2 text-lg text-white">
-                    <span className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-zinc-300" />
-                      {ngo.name}
+              <Card className="h-full border-white/12 bg-gradient-to-br from-[#0f0f12] to-[#0a0a0d] py-0 backdrop-blur-xl">
+                <CardHeader className="space-y-3 px-6 pb-3 pt-6">
+                  <CardTitle className="flex items-start justify-between gap-3 text-white">
+                    <span className="flex min-w-0 items-start gap-3">
+                      <Building2 className="mt-1 h-6 w-6 shrink-0 text-zinc-200" />
+                      <span className="min-w-0 break-words text-2xl font-semibold leading-tight text-white">
+                        {ngo.name}
+                      </span>
                     </span>
-                    <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-medium text-zinc-300">
+                    <span className="shrink-0 rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-medium text-zinc-300">
                       {ngo.description.includes("Secunderabad")
                         ? "Secunderabad"
                         : "Hyderabad"}
                     </span>
                   </CardTitle>
-                  <p className="text-sm leading-relaxed text-zinc-400">{ngo.description}</p>
+                  <p className="pr-1 text-lg leading-relaxed text-zinc-400">
+                    {ngo.description}
+                  </p>
                 </CardHeader>
-                <CardContent className="space-y-3 pb-5">
-                  <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
-                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                <CardContent className="space-y-4 px-6 pb-6">
+                  <div className="grid grid-cols-1 gap-2 text-base sm:grid-cols-3">
+                    <div className="rounded-lg border border-rose-300/30 bg-rose-500/12 px-4 py-2.5 text-rose-100">
                       Food: <span className="font-semibold">{ngo.supplies.food}</span>
                     </div>
-                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                    <div className="rounded-lg border border-emerald-300/30 bg-emerald-500/12 px-4 py-2.5 text-emerald-100">
                       Medical: <span className="font-semibold">{ngo.supplies.medical}</span>
                     </div>
-                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                    <div className="rounded-lg border border-sky-300/30 bg-sky-500/12 px-4 py-2.5 text-sky-100">
                       Shelter: <span className="font-semibold">{ngo.supplies.shelter}</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-zinc-400">
-                    <span>Distance: {distanceInKm(center, ngo.location).toFixed(1)} km</span>
-                    <span>Updated {new Date(ngo.updatedAt).toLocaleTimeString()}</span>
+                  <div className="text-sm text-zinc-400">
+                    Distance: {distanceInKm(center, ngo.location).toFixed(1)} km
                   </div>
                 </CardContent>
               </Card>

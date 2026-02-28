@@ -31,7 +31,7 @@ export const initialNgos: NGO[] = [
     name: "Banjara Hills Relief Hub",
     description: "Serving Hyderabad with meal packs and hydration support.",
     location: { lat: 17.4126, lng: 78.4347 },
-    supplies: { food: 338, medical: 152, shelter: 102 },
+    supplies: { food: 88, medical: 74, shelter: 63 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -39,7 +39,7 @@ export const initialNgos: NGO[] = [
     name: "Jubilee Hills Aid Point",
     description: "Serving Hyderabad with rapid first-aid and pharmacy support.",
     location: { lat: 17.432, lng: 78.407 },
-    supplies: { food: 326, medical: 173, shelter: 57 },
+    supplies: { food: 79, medical: 92, shelter: 58 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -47,7 +47,7 @@ export const initialNgos: NGO[] = [
     name: "L B Nagar Field Unit",
     description: "Serving Hyderabad with ration dispatch and family care kits.",
     location: { lat: 17.3456, lng: 78.5525 },
-    supplies: { food: 302, medical: 244, shelter: 166 },
+    supplies: { food: 95, medical: 81, shelter: 67 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -55,7 +55,7 @@ export const initialNgos: NGO[] = [
     name: "Attapur Relief Hub",
     description: "Serving Hyderabad with shelter setup and emergency meals.",
     location: { lat: 17.3662, lng: 78.4315 },
-    supplies: { food: 373, medical: 196, shelter: 139 },
+    supplies: { food: 84, medical: 76, shelter: 71 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -63,7 +63,7 @@ export const initialNgos: NGO[] = [
     name: "Kushaiguda Care Node",
     description: "Serving Secunderabad with women and child safe-space support.",
     location: { lat: 17.4852, lng: 78.5708 },
-    supplies: { food: 396, medical: 329, shelter: 229 },
+    supplies: { food: 90, medical: 86, shelter: 78 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -71,7 +71,7 @@ export const initialNgos: NGO[] = [
     name: "Neredmet Field Unit",
     description: "Serving Secunderabad with ration and medical dispatch.",
     location: { lat: 17.4878, lng: 78.5318 },
-    supplies: { food: 430, medical: 243, shelter: 87 },
+    supplies: { food: 73, medical: 97, shelter: 55 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -79,7 +79,7 @@ export const initialNgos: NGO[] = [
     name: "Alwal Support Station",
     description: "Serving Secunderabad with emergency nutrition and medicine aid.",
     location: { lat: 17.5153, lng: 78.4993 },
-    supplies: { food: 312, medical: 214, shelter: 121 },
+    supplies: { food: 69, medical: 83, shelter: 64 },
     updatedAt: FIXED_UPDATED_AT,
   },
   {
@@ -87,7 +87,7 @@ export const initialNgos: NGO[] = [
     name: "Malkajgiri Response Center",
     description: "Serving Secunderabad with shelter and first-response supplies.",
     location: { lat: 17.4474, lng: 78.5383 },
-    supplies: { food: 284, medical: 189, shelter: 144 },
+    supplies: { food: 98, medical: 70, shelter: 88 },
     updatedAt: FIXED_UPDATED_AT,
   },
 ];

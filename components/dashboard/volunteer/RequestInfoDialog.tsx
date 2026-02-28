@@ -23,6 +23,8 @@ interface RequestInfoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: CrisisRequest;
+  canAccept: boolean;
+  onAccept: () => void;
 }
 
 function toEmbedMapUrl(lat: number, lng: number) {
@@ -37,12 +39,12 @@ function locationLabel(request: CrisisRequest) {
 }
 
 function requestTypeIcon(request: CrisisRequest) {
-  if (request.supplyType === "food") return <Sandwich className="h-12 w-12 text-blue-500" />;
+  if (request.supplyType === "food") return <Sandwich className="h-12 w-12 text-sky-300" />;
   if (request.supplyType === "medical") {
-    return <HeartPulse className="h-12 w-12 text-blue-500" />;
+    return <HeartPulse className="h-12 w-12 text-sky-300" />;
   }
-  if (request.supplyType === "shelter") return <Home className="h-12 w-12 text-blue-500" />;
-  return <Package className="h-12 w-12 text-blue-500" />;
+  if (request.supplyType === "shelter") return <Home className="h-12 w-12 text-sky-300" />;
+  return <Package className="h-12 w-12 text-sky-300" />;
 }
 
 function requestTypeLabel(request: CrisisRequest) {
@@ -56,52 +58,72 @@ export function RequestInfoDialog({
   open,
   onOpenChange,
   request,
+  canAccept,
+  onAccept,
 }: RequestInfoDialogProps) {
   const approved = request.status === "accepted";
-  const statusText = approved ? "Request Approved" : "Awaiting Volunteer";
-  const statusClasses = approved
-    ? "border-emerald-300 bg-emerald-100 text-emerald-900"
-    : "border-amber-300 bg-amber-100 text-amber-900";
+  const approvedClasses = "border-emerald-300/35 bg-emerald-500/15 text-emerald-100";
+  const acceptClasses =
+    request.priority === "red"
+      ? "border-red-300/35 bg-red-500/15 text-red-100 hover:bg-red-500/22"
+      : request.priority === "orange"
+        ? "border-amber-300/35 bg-amber-500/15 text-amber-100 hover:bg-amber-500/22"
+        : "border-emerald-300/35 bg-emerald-500/15 text-emerald-100 hover:bg-emerald-500/22";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] max-w-5xl overflow-y-auto border-slate-200 bg-[#f4f5f7] p-0 text-slate-800">
-        <div className="space-y-6 p-6 sm:p-8">
+      <DialogContent className="max-h-[94vh] w-[94vw] !max-w-[94vw] overflow-y-auto border-white/15 bg-[radial-gradient(circle_at_16%_0%,rgba(244,114,182,0.12),transparent_36%),radial-gradient(circle_at_88%_0%,rgba(251,146,60,0.12),transparent_36%),linear-gradient(135deg,#08080a,#111118_52%,#0a0a0e)] p-0 text-zinc-100 shadow-[0_40px_120px_-58px_rgba(0,0,0,0.95)] sm:!max-w-[88vw] lg:!max-w-[60vw]">
+        <div className="space-y-6 p-6 sm:p-8 lg:p-10">
           <DialogHeader className="space-y-3 text-left">
-            <DialogTitle className="text-4xl font-semibold tracking-tight text-slate-800">
+            <DialogTitle className="text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
               <span className="mr-4 inline-flex align-middle">{requestTypeIcon(request)}</span>
               <span className="align-middle">{requestTypeLabel(request)}</span>
             </DialogTitle>
-            <DialogDescription className="text-lg text-slate-500">
+            <DialogDescription className="text-lg text-zinc-400">
               Request details and location snapshot.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-5 text-slate-700">
-            <p className="text-4xl font-medium text-slate-700">
-              <Users className="mr-3 inline h-8 w-8 text-slate-400" />
+          <div className="space-y-5 text-zinc-200">
+            <p className="text-3xl font-medium text-zinc-100 sm:text-4xl">
+              <Users className="mr-3 inline h-8 w-8 text-zinc-400" />
               {request.itemsCount} people
             </p>
 
-            <p className="max-w-4xl text-3xl leading-[1.45] text-slate-700 sm:text-2xl">
+            <p className="max-w-5xl text-xl leading-[1.45] text-zinc-200 sm:text-2xl">
               {request.description}
             </p>
 
             <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-              <p className="text-4xl font-medium text-slate-700 sm:text-2xl">
-                <MapPin className="mr-2 inline h-8 w-8 text-amber-500" />
+              <p className="text-2xl font-medium text-zinc-100 sm:text-3xl">
+                <MapPin className="mr-2 inline h-8 w-8 text-amber-300" />
                 {locationLabel(request)}
               </p>
-              <span
-                className={`inline-flex items-center rounded-xl border px-4 py-2 text-xl font-medium sm:text-lg ${statusClasses}`}
-              >
-                <ShieldAlert className="mr-2 h-5 w-5" />
-                {statusText}
-              </span>
+              {approved ? (
+                <span
+                  className={`inline-flex items-center rounded-xl border px-4 py-2 text-xl font-medium sm:text-lg ${approvedClasses}`}
+                >
+                  <ShieldAlert className="mr-2 h-5 w-5" />
+                  Request Approved
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!canAccept}
+                  onClick={() => {
+                    onAccept();
+                    onOpenChange(false);
+                  }}
+                  className={`inline-flex items-center rounded-xl border px-4 py-2 text-xl font-medium transition disabled:cursor-not-allowed disabled:border-zinc-500/35 disabled:bg-zinc-600/20 disabled:text-zinc-400 sm:text-lg ${acceptClasses}`}
+                >
+                  <ShieldAlert className="mr-2 h-5 w-5" />
+                  {canAccept ? "Accept Request" : "Insufficient Supplies"}
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-[0_18px_38px_-22px_rgba(15,23,42,0.45)]">
+          <div className="overflow-hidden rounded-2xl border border-white/15 bg-black/40 shadow-[0_20px_44px_-28px_rgba(0,0,0,0.95)]">
             <iframe
               title={`Map preview for ${request.title}`}
               src={toEmbedMapUrl(request.location.lat, request.location.lng)}
