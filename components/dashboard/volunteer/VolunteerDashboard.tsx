@@ -49,16 +49,16 @@ function SectionPanel({
 }) {
   const classes =
     color === "red"
-      ? "border-red-300/35 bg-red-500/5 shadow-[0_20px_70px_-45px_rgba(239,68,68,1)]"
+      ? "border-red-300/30 bg-gradient-to-br from-[#170809] via-[#0d0d11] to-[#15090a] shadow-[0_28px_80px_-56px_rgba(239,68,68,0.95)]"
       : color === "orange"
-        ? "border-orange-300/35 bg-orange-500/5 shadow-[0_20px_70px_-50px_rgba(245,158,11,0.9)]"
-        : "border-emerald-300/25 bg-emerald-500/5";
+        ? "border-orange-300/30 bg-gradient-to-br from-[#181208] via-[#0d0d11] to-[#151008] shadow-[0_28px_80px_-56px_rgba(245,158,11,0.9)]"
+        : "border-emerald-300/25 bg-gradient-to-br from-[#09130e] via-[#0d0d11] to-[#081112] shadow-[0_28px_80px_-60px_rgba(34,197,94,0.75)]";
 
   return (
     <section className={`rounded-3xl border p-4 backdrop-blur-xl sm:p-5 ${classes}`}>
       <h3 className="text-2xl font-bold text-white">{title}</h3>
       <p className="mb-4 mt-1 text-sm text-zinc-400">{subtitle}</p>
-      <div className="grid gap-4 md:grid-cols-2">{children}</div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
     </section>
   );
 }
@@ -190,15 +190,19 @@ export function VolunteerDashboard({
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+      <section className="grid gap-4 xl:grid-cols-[minmax(360px,0.95fr)_minmax(500px,1.25fr)]">
         <Card className="border-white/10 bg-white/[0.04] py-0 backdrop-blur-xl">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-white">
               <Filter className="h-4 w-4 text-orange-200" />
-              Volunteer Filter Section
+              Request Filters
             </CardTitle>
+            <p className="text-sm text-zinc-400">
+              Refine the queue by support type. Custom requests can be searched by
+              keywords.
+            </p>
           </CardHeader>
-          <CardContent className="space-y-3 pb-5">
+          <CardContent className="space-y-4 pb-5">
             <div className="flex flex-wrap gap-2">
               {(["all", "food", "medical", "shelter", "other"] as const).map((value) => (
                 <Button
@@ -208,11 +212,19 @@ export function VolunteerDashboard({
                   onClick={() => setFilterType(value)}
                   className={
                     filterType === value
-                      ? "rounded-full bg-gradient-to-r from-orange-400 to-amber-300 text-zinc-900"
-                      : "rounded-full border-white/20 bg-white/[0.02] text-zinc-100"
+                      ? "h-11 rounded-full bg-gradient-to-r from-orange-400 to-amber-300 px-5 text-zinc-900"
+                      : "h-11 rounded-full border-white/20 bg-white/[0.02] px-5 text-zinc-100"
                   }
                 >
-                  {value === "all" ? "All" : value === "food" ? "Food Supplies" : value === "medical" ? "Medical Supplies" : value === "shelter" ? "Shelter" : "Other"}
+                  {value === "all"
+                    ? "All Requests"
+                    : value === "food"
+                      ? "Food Supplies"
+                      : value === "medical"
+                        ? "Medical Supplies"
+                        : value === "shelter"
+                          ? "Shelter Support"
+                          : "Custom Support"}
                 </Button>
               ))}
             </div>
@@ -222,68 +234,74 @@ export function VolunteerDashboard({
                 <Input
                   value={otherQuery}
                   onChange={(event) => setOtherQuery(event.target.value)}
-                  placeholder="Filter custom requests by description..."
+                  placeholder="Search custom requests by notes or location..."
                   className="h-10 border-0 bg-transparent px-0 focus-visible:ring-0"
                 />
               </div>
             ) : null}
+            <p className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-xs text-zinc-400">
+              Showing {filteredRequests.length} requests in this view.
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-white/10 bg-white/[0.04] py-0 backdrop-blur-xl">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-white">Volunteer Supply Editor</CardTitle>
+            <p className="text-sm text-zinc-400">
+              Keep inventory values current so acceptance checks are accurate.
+            </p>
           </CardHeader>
-          <CardContent className="space-y-3 pb-5">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-              <div className="space-y-1">
-                <label className="text-xs text-zinc-400">Food Amount</label>
+          <CardContent className="space-y-4 pb-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">Food Stock</label>
                 <Input
                   type="number"
                   value={volunteerSupply.foodAmount}
                   onChange={(event) =>
                     handleSupplyInput("foodAmount", Number(event.target.value))
                   }
-                  className="border-white/20 bg-black/35"
+                  className="h-11 border-white/20 bg-black/35 text-zinc-100"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-zinc-400">Medical Amount</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-300">Medical Stock</label>
                 <Input
                   type="number"
                   value={volunteerSupply.medicalAmount}
                   onChange={(event) =>
                     handleSupplyInput("medicalAmount", Number(event.target.value))
                   }
-                  className="border-white/20 bg-black/35"
+                  className="h-11 border-white/20 bg-black/35 text-zinc-100"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs text-zinc-400">Shelter Amount</label>
+              <div className="space-y-1.5 sm:col-span-2 xl:col-span-1">
+                <label className="text-xs font-medium text-zinc-300">Shelter Stock</label>
                 <Input
                   type="number"
                   value={volunteerSupply.shelterAmount}
                   onChange={(event) =>
                     handleSupplyInput("shelterAmount", Number(event.target.value))
                   }
-                  className="border-white/20 bg-black/35"
+                  className="h-11 border-white/20 bg-black/35 text-zinc-100"
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs text-zinc-400">Custom Description</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-300">Custom Capability Note</label>
               <Textarea
                 value={volunteerSupply.customDescription}
                 onChange={(event) =>
                   updateVolunteerSupply({ customDescription: event.target.value })
                 }
-                className="min-h-[86px] border-white/20 bg-black/35"
+                className="min-h-[98px] border-white/20 bg-black/35 text-zinc-100"
               />
             </div>
             <Button
               type="button"
               onClick={saveEditorState}
-              className="h-10 rounded-xl bg-gradient-to-r from-orange-400 to-amber-300 text-zinc-900"
+              className="h-11 rounded-xl bg-gradient-to-r from-orange-400 to-amber-300 text-zinc-900"
             >
               {isSaving ? (
                 <>
@@ -305,8 +323,8 @@ export function VolunteerDashboard({
       ) : null}
 
       <SectionPanel
-        title="Red - Urgent"
-        subtitle="Critical requests requiring immediate action."
+        title="Critical Queue"
+        subtitle="Highest urgency requests. These should be handled first."
         color="red"
       >
         {grouped.red.map((request) => (
@@ -325,8 +343,8 @@ export function VolunteerDashboard({
       </SectionPanel>
 
       <SectionPanel
-        title="Orange - Moderate"
-        subtitle="Requests that need attention during this shift."
+        title="Active Queue"
+        subtitle="Moderate-priority cases needing action in this shift."
         color="orange"
       >
         {grouped.orange.map((request) => (
@@ -345,8 +363,8 @@ export function VolunteerDashboard({
       </SectionPanel>
 
       <SectionPanel
-        title="Green - Low Priority"
-        subtitle="Lower urgency requests still needing follow-up."
+        title="Follow-Up Queue"
+        subtitle="Lower-priority requests still awaiting assignment."
         color="green"
       >
         {grouped.green.map((request) => (

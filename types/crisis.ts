@@ -35,6 +35,7 @@ export interface CrisisRequest {
   title: string;
   description: string;
   location: Coordinates;
+  areaName?: string;
   priority: RequestPriority;
   supplyType: SupplyType;
   itemsCount: number;

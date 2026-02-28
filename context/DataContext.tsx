@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  useCallback,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import {
+  CITY_RELIEF_POINTS,
   FALLBACK_LOCATION,
   initialNgos,
   initialRequests,
@@ -32,6 +33,67 @@ import { canVolunteerAcceptRequest } from "@/utils/requests";
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
 
+const requestTitleTemplates: Record<SupplyType, readonly string[]> = {
+  food: [
+    "Meal Pack Dispatch",
+    "Cooked Food Delivery",
+    "Dry Ration Allocation",
+    "Community Kitchen Supply",
+  ],
+  medical: [
+    "Emergency Medical Support",
+    "Clinic Refill Request",
+    "First-Aid Priority Dispatch",
+    "Critical Medicine Requirement",
+  ],
+  shelter: [
+    "Night Shelter Allocation",
+    "Temporary Housing Support",
+    "Bedding and Cover Request",
+    "Emergency Shelter Coordination",
+  ],
+  other: [
+    "Custom Assistance Requirement",
+    "Special Aid Request",
+    "Field Coordinator Escalation",
+    "Priority Custom Support",
+  ],
+};
+
+const requestDescriptionTemplates: Record<SupplyType, readonly string[]> = {
+  food: [
+    "Families have skipped at least one meal and need ready-to-eat packs with clean water support.",
+    "Community volunteers flagged households without gas supply, so shelf-stable food kits are required.",
+    "Children and elderly residents need immediate meal support before the next civic distribution window.",
+    "The local kitchen network is overloaded, and cooked food packets are needed for short-term relief.",
+  ],
+  medical: [
+    "A field triage desk is short on dressings, antiseptics, and common emergency medicine kits.",
+    "Patients with chronic conditions are running out of medicine, requiring urgent refill support.",
+    "Recent injuries increased clinic load, and first-aid consumables must be replenished quickly.",
+    "On-ground health volunteers requested pain-management and infection-control medical supplies.",
+  ],
+  shelter: [
+    "Displaced families need sleeping mats, tarpaulin cover, and weather-safe temporary shelter setup.",
+    "Night-time relocation requires basic bedding and partition supplies for safety and privacy.",
+    "Rain-affected households need dry shelter materials and temporary sleeping space support.",
+    "Transit shelters are near capacity and need additional cots, covers, and emergency housing kits.",
+  ],
+  other: [
+    "Field teams requested custom assistance packages for vulnerable households with specific needs.",
+    "Community coordinators need non-standard aid bundles to support special care cases.",
+    "A local group requested custom logistics support including mobility and hygiene accessories.",
+    "Relief volunteers asked for specialized kits beyond standard food, medical, and shelter categories.",
+  ],
+};
+
+const requestFollowupTemplates = [
+  "On-site volunteer verification is complete.",
+  "Local coordinator confirmed this as the next dispatch priority.",
+  "Distribution is planned within the next operational cycle.",
+  "Support is needed before the next weather-impact window.",
+] as const;
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
@@ -50,27 +112,68 @@ function priorityFromItemsCount(itemsCount: number): RequestPriority {
   return "green";
 }
 
-function nextRequestTitle(supplyType: SupplyType) {
-  if (supplyType === "food") return "Emergency Food Request";
-  if (supplyType === "medical") return "Emergency Medical Request";
-  if (supplyType === "shelter") return "Emergency Shelter Request";
-  return "Custom Support Request";
+function nextRequestTitle(supplyType: SupplyType, areaName: string) {
+  return `${randomChoice(requestTitleTemplates[supplyType])} - ${areaName}`;
 }
 
-function randomLocationNear(center: Coordinates): Coordinates {
-  const latOffset = (Math.random() - 0.5) * 0.08;
-  const lngOffset = (Math.random() - 0.5) * 0.08;
+function composeRequestDescription(
+  supplyType: SupplyType,
+  areaName: string,
+  itemsCount: number,
+) {
+  const base = randomChoice(requestDescriptionTemplates[supplyType]);
+  const followup = randomChoice(requestFollowupTemplates);
+  return `${base} Around ${itemsCount} people are currently mapped in ${areaName}. ${followup}`;
+}
+
+function jitterLocation(location: Coordinates, spread = 0.01): Coordinates {
   return {
-    lat: center.lat + latOffset,
-    lng: center.lng + lngOffset,
+    lat: location.lat + (Math.random() - 0.5) * spread,
+    lng: location.lng + (Math.random() - 0.5) * spread,
   };
 }
 
-function deduceSupplyDescription(type: SupplyType) {
-  if (type === "food") return "Food packets required for affected families.";
-  if (type === "medical") return "Immediate medicine and aid kits required.";
-  if (type === "shelter") return "Temporary shelter support needed urgently.";
-  return "Custom request details provided by field coordinator.";
+function isDistinctLocation(candidate: Coordinates, existing: CrisisRequest[]) {
+  return !existing.some((request) => {
+    const latDelta = Math.abs(request.location.lat - candidate.lat);
+    const lngDelta = Math.abs(request.location.lng - candidate.lng);
+    return latDelta < 0.0014 && lngDelta < 0.0014;
+  });
+}
+
+function uniqueLocationNear(base: Coordinates, existing: CrisisRequest[]) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const candidate = jitterLocation(base, 0.008 + attempt * 0.0012);
+    if (isDistinctLocation(candidate, existing)) {
+      return candidate;
+    }
+  }
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const candidate = jitterLocation(FALLBACK_LOCATION, 0.035 + attempt * 0.003);
+    if (isDistinctLocation(candidate, existing)) {
+      return candidate;
+    }
+  }
+
+  return jitterLocation(base, 0.02);
+}
+
+function pickUniqueArea(existing: CrisisRequest[]) {
+  const usedAreas = new Set(
+    existing
+      .map((request) => request.areaName)
+      .filter((areaName): areaName is string => Boolean(areaName)),
+  );
+  const shuffled = [...CITY_RELIEF_POINTS].sort(() => Math.random() - 0.5);
+
+  const availablePoint = shuffled.find((point) => !usedAreas.has(point.name));
+  const selectedPoint = availablePoint ?? randomChoice(shuffled);
+
+  return {
+    areaName: selectedPoint.name,
+    baseLocation: { lat: selectedPoint.lat, lng: selectedPoint.lng },
+  };
 }
 
 function getRequiredSupply(type: SupplyType) {
@@ -125,7 +228,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setRequests((previous) => {
         const withAgingPressure = previous.map((request) => {
           if (request.status !== "pending") return request;
-          if (Math.random() > 0.18) return request;
+          if (Math.random() > 0.2) return request;
 
           const addedItems = randomInt(1, 4);
           const nextItems = clamp(request.itemsCount + addedItems, 1, 120);
@@ -136,7 +239,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           };
         });
 
-        if (Math.random() > 0.45) return withAgingPressure;
+        if (Math.random() > 0.43) return withAgingPressure;
 
         const supplyType = randomChoice<SupplyType>([
           "food",
@@ -144,15 +247,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
           "shelter",
           "other",
         ]);
-        const itemsCount = randomInt(2, 42);
+        const itemsCount = randomInt(3, 45);
         const createdAt = Date.now();
-        const center = userLocation ?? FALLBACK_LOCATION;
+        const area = pickUniqueArea(withAgingPressure);
+        const location = uniqueLocationNear(area.baseLocation, withAgingPressure);
 
         const liveRequest: CrisisRequest = {
           id: `live-${createdAt}`,
-          title: nextRequestTitle(supplyType),
-          description: deduceSupplyDescription(supplyType),
-          location: randomLocationNear(center),
+          title: nextRequestTitle(supplyType, area.areaName),
+          description: composeRequestDescription(supplyType, area.areaName, itemsCount),
+          areaName: area.areaName,
+          location,
           priority: priorityFromItemsCount(itemsCount),
           supplyType,
           itemsCount,
@@ -161,7 +266,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           createdAt,
         };
 
-        return [liveRequest, ...withAgingPressure].slice(0, 50);
+        return [liveRequest, ...withAgingPressure].slice(0, 60);
       });
 
       setLastUpdatedAt(Date.now());
@@ -216,20 +321,27 @@ export function DataProvider({ children }: { children: ReactNode }) {
       );
 
       const createdAt = Date.now();
-      const nextRequest: CrisisRequest = {
-        id: `order-${createdAt}`,
-        title: `${nextRequestTitle(supplyType)} from ${targetNgo.name}`,
-        description: `Victim order by ${requesterEmail} for ${cleanQuantity} ${supplyType} items.`,
-        location: { ...targetNgo.location },
-        priority: priorityFromItemsCount(cleanQuantity),
-        supplyType,
-        itemsCount: cleanQuantity,
-        status: "pending",
-        acceptedBy: null,
-        createdAt,
-      };
 
-      setRequests((previous) => [nextRequest, ...previous].slice(0, 50));
+      setRequests((previous) => {
+        const areaName = targetNgo.name;
+        const location = uniqueLocationNear(targetNgo.location, previous);
+        const nextRequest: CrisisRequest = {
+          id: `order-${createdAt}`,
+          title: nextRequestTitle(supplyType, areaName),
+          description: `Placed by ${requesterEmail}: ${composeRequestDescription(supplyType, areaName, cleanQuantity)}`,
+          areaName,
+          location,
+          priority: priorityFromItemsCount(cleanQuantity),
+          supplyType,
+          itemsCount: cleanQuantity,
+          status: "pending",
+          acceptedBy: null,
+          createdAt,
+        };
+
+        return [nextRequest, ...previous].slice(0, 60);
+      });
+
       setLastUpdatedAt(createdAt);
 
       return {
@@ -308,16 +420,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [requests, volunteerSupply],
   );
 
-  const updateVolunteerSupply = useCallback(
-    (updates: Partial<VolunteerSupplyState>) => {
-      setVolunteerSupply((previous) => ({
-        ...previous,
-        ...updates,
-      }));
-      setLastUpdatedAt(Date.now());
-    },
-    [],
-  );
+  const updateVolunteerSupply = useCallback((updates: Partial<VolunteerSupplyState>) => {
+    setVolunteerSupply((previous) => ({
+      ...previous,
+      ...updates,
+    }));
+    setLastUpdatedAt(Date.now());
+  }, []);
 
   const value = useMemo<DataContextValue>(
     () => ({

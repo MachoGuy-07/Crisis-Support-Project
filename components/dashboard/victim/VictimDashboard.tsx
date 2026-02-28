@@ -40,10 +40,10 @@ interface VictimDashboardProps {
 }
 
 export function VictimDashboard({ email }: VictimDashboardProps) {
-  const { ngos, requests, placeOrder, userLocation, lastUpdatedAt } = useDataContext();
+  const { ngos, requests, placeOrder, userLocation } = useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
-  const [radiusKm, setRadiusKm] = useState(10);
+  const [radiusKm, setRadiusKm] = useState(28);
   const [urgency, setUrgency] = useState<UrgencyLevel>("moderate");
   const [searchText, setSearchText] = useState("");
   const [scanActive, setScanActive] = useState(false);
@@ -151,7 +151,7 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
             <input
               type="range"
               min={1}
-              max={50}
+              max={65}
               value={radiusKm}
               onChange={(event) => handleRadiusChange(Number(event.target.value))}
               className="w-full accent-rose-300"
@@ -267,40 +267,49 @@ export function VictimDashboard({ email }: VictimDashboardProps) {
       <section className="space-y-3">
         <h3 className="text-2xl font-bold text-white">Live Supply Monitoring</h3>
         <p className="text-sm text-zinc-400">
-          Exact NGO inventory inside your selected radius. Updated at{" "}
-          {new Date(lastUpdatedAt).toLocaleTimeString()}.
+          Showing {filteredNgos.length} relief centers within {radiusKm} km. Inventory
+          is refreshed in realtime for Hyderabad and Secunderabad.
         </p>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="columns-1 gap-4 md:columns-2 xl:columns-3">
           {filteredNgos.map((ngo, index) => (
             <motion.div
               key={ngo.id}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
+              className="mb-4 break-inside-avoid"
             >
-              <Card className="border-white/10 bg-white/[0.04] py-0 backdrop-blur-xl">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg text-white">
-                    <Building2 className="h-4 w-4 text-zinc-300" />
-                    {ngo.name}
+              <Card className="border-white/12 bg-gradient-to-br from-[#0f0f12] to-[#0a0a0d] py-0 backdrop-blur-xl">
+                <CardHeader className="space-y-2 pb-2">
+                  <CardTitle className="flex items-center justify-between gap-2 text-lg text-white">
+                    <span className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-zinc-300" />
+                      {ngo.name}
+                    </span>
+                    <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-medium text-zinc-300">
+                      {ngo.description.includes("Secunderabad")
+                        ? "Secunderabad"
+                        : "Hyderabad"}
+                    </span>
                   </CardTitle>
+                  <p className="text-sm leading-relaxed text-zinc-400">{ngo.description}</p>
                 </CardHeader>
-                <CardContent className="space-y-2 pb-5">
-                  <p className="text-xs text-zinc-400">{ngo.description}</p>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="rounded-md border border-white/10 bg-black/30 px-2 py-1">
-                      Food: {ngo.supplies.food}
+                <CardContent className="space-y-3 pb-5">
+                  <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                      Food: <span className="font-semibold">{ngo.supplies.food}</span>
                     </div>
-                    <div className="rounded-md border border-white/10 bg-black/30 px-2 py-1">
-                      Medical: {ngo.supplies.medical}
+                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                      Medical: <span className="font-semibold">{ngo.supplies.medical}</span>
                     </div>
-                    <div className="rounded-md border border-white/10 bg-black/30 px-2 py-1">
-                      Shelter: {ngo.supplies.shelter}
+                    <div className="rounded-lg border border-white/12 bg-black/35 px-3 py-2 text-zinc-100">
+                      Shelter: <span className="font-semibold">{ngo.supplies.shelter}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-500">
-                    Distance: {distanceInKm(center, ngo.location).toFixed(1)} km
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span>Distance: {distanceInKm(center, ngo.location).toFixed(1)} km</span>
+                    <span>Updated {new Date(ngo.updatedAt).toLocaleTimeString()}</span>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
