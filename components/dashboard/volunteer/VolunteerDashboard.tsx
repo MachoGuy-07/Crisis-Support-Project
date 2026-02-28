@@ -44,7 +44,7 @@ export function VolunteerDashboard({
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [otherQuery, setOtherQuery] = useState("");
-  const visibleLimit = 8;
+  const visibleLimit = 9;
 
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
@@ -144,7 +144,7 @@ export function VolunteerDashboard({
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-xl sm:p-5">
         {visibleRequests.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {visibleRequests.map((request) => (
               <RequestCard
                 key={request.id}

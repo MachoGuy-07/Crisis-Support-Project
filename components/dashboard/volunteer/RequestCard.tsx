@@ -122,7 +122,9 @@ export function RequestCard({ request, canAccept, onAccept }: RequestCardProps) 
               {request.itemsCount} people
             </p>
 
-            <p className="text-sm leading-relaxed text-zinc-300">{request.description}</p>
+            <p className="min-h-[2.8rem] overflow-hidden text-sm leading-relaxed text-zinc-300 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+              {request.description}
+            </p>
 
             <p className="rounded-xl border border-white/12 bg-black/35 px-3 py-2 text-sm text-zinc-200">
               <MapPin className="mr-2 inline h-4 w-4 text-amber-300" />
