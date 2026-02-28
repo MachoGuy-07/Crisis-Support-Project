@@ -27,45 +27,117 @@
 
 @layer base {
   :root {
-    --background: hsl(0, 0%, 0%);
-    --foreground: hsl(0, 0%, 100%);
+    --background: #0f0f0f;
+    --foreground: #fafafa;
 
-    --card: hsl(0, 0%, 5%);
-    --card-foreground: hsl(0, 0%, 100%);
+    --card: #151515;
+    --card-foreground: #fafafa;
+    --popover: #131313;
+    --popover-foreground: #f4f4f5;
 
-    --popover: hsl(0, 0%, 5%);
-    --popover-foreground: hsl(0, 0%, 100%);
+    --primary: #fda4af;
+    --primary-foreground: #1f1021;
+    --secondary: #fdba74;
+    --secondary-foreground: #241203;
 
-    /* Bright Pastel Lilac/Pink for primary CTA */
-    --primary: hsl(320, 80%, 80%);
-    --primary-foreground: hsl(320, 90%, 10%);
+    --muted: #1d1d1d;
+    --muted-foreground: #a1a1aa;
+    --accent: #2a2330;
+    --accent-foreground: #e4e4e7;
 
-    /* Bright Pastel Mint for secondary accents */
-    --secondary: hsl(150, 80%, 80%);
-    --secondary-foreground: hsl(150, 90%, 10%);
+    --destructive: #ef4444;
+    --destructive-foreground: #fee2e2;
 
-    --muted: hsl(0, 0%, 15%);
-    --muted-foreground: hsl(0, 0%, 70%);
-
-    --accent: hsl(200, 80%, 80%); /* Pastel Blue */
-    --accent-foreground: hsl(200, 90%, 10%);
-
-    --destructive: hsl(0, 85%, 60%);
-    --destructive-foreground: hsl(0, 0%, 98%);
-
-    --border: hsl(0, 0%, 20%);
-    --input: hsl(0, 0%, 15%);
-    --ring: hsl(320, 80%, 80%);
-
-    --radius: 0.75rem;
+    --border: #2e2e2e;
+    --input: #1b1b1b;
+    --ring: #f9a8d4;
+    --radius: 0.95rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body), "Segoe UI", sans-serif;
   }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), "Segoe UI", sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+.leaflet-container {
+  background: #0a0a0a;
+  outline: none;
+}
+
+.leaflet-tile-pane {
+  filter: brightness(0.62) contrast(1.22) saturate(0.9) hue-rotate(182deg);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(8, 8, 8, 0.86);
+  box-shadow: 0 16px 40px -24px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  padding: 10px;
+  width: 290px !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(8, 8, 8, 0.86);
+}
+
+.leaflet-user-marker,
+.leaflet-ngo-marker,
+.leaflet-volunteer-marker {
+  background: transparent;
+  border: 0;
+}
+
+.leaflet-user-marker-inner {
+  display: block;
+  height: 24px;
+  width: 24px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: radial-gradient(circle at 30% 30%, #f9a8d4, #ec4899);
+  box-shadow:
+    0 0 0 3px rgba(249, 168, 212, 0.22),
+    0 12px 24px -14px #ec4899;
+}
+
+.leaflet-ngo-marker-inner {
+  display: block;
+  height: 20px;
+  width: 20px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: radial-gradient(circle at 30% 30%, #fdba74, #f97316);
+  box-shadow:
+    0 0 0 3px rgba(253, 186, 116, 0.22),
+    0 12px 24px -16px #f97316;
+}
+
+.leaflet-volunteer-marker-inner {
+  display: block;
+  height: 22px;
+  width: 22px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: radial-gradient(circle at 30% 30%, #f87171, #ef4444);
+  box-shadow:
+    0 0 0 3px rgba(248, 113, 113, 0.22),
+    0 12px 24px -16px #ef4444;
 }

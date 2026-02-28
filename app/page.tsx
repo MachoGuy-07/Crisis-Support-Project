@@ -1,13 +1,18 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Navbar from "@/components/navbar";
+import { ArrowRight, UsersRound } from "lucide-react";
+// import Navbar from "@/components/navbar";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen overflow-hidden container mx-auto px-6">
-      <header className="flex items-center justify-between py-8">
+      {/* Background ambient light effects */}
+      <div className="pointer-events-none absolute -z-10 inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(244,114,182,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(251,146,60,0.18),transparent_33%),linear-gradient(125deg,#030303,#0d0d0d_50%,#050505)]" />
+      <div className="pointer-events-none absolute -z-10 inset-0 opacity-75 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:44px_44px]" />
+      <div className="pointer-events-none absolute -z-10 inset-0 opacity-75 bg-black/25" />
+
+      <header className="flex z-10 items-center justify-between py-8">
         <Logo />
         <nav className="flex items-center gap-4">
           <Button
@@ -19,9 +24,9 @@ export default function HomePage() {
           </Button>
           <Button
             asChild
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_hsla(var(--primary)/20%)]"
+            className="rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 text-zinc-900 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(251,113,133,0.45)]"
           >
-            <Link href="/register">Get Started</Link>
+            <Link href="/login">Get Started</Link>
           </Button>
         </nav>
       </header>
@@ -32,23 +37,24 @@ export default function HomePage() {
           Live Crisis Updates
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
+        <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-white md:text-7xl">
           Realtime Help in <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary pb-2">
+          <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-orange-200 bg-clip-text text-transparent">
             Times of Need.
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl text-balance">
-          Crisis Support helps you give and receive real-time updates for food,
-          water, shelter, and medical assistance when it matters most.
+        <p className="mb-10 max-w-2xl text-lg text- md:text-xl">
+          Crisis Support connects victims and volunteers in one live command
+          system with geospatial aid tracking, inventory monitoring, and
+          realtime request handling.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
           <Button
             asChild
             size="lg"
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_40px_hsla(var(--primary)/30%)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_hsla(var(--primary)/40%)] rounded-xl text-base h-14 px-8"
+            className="h-14 w-full rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 px-8 text-base text-zinc-900 shadow-[0_0_45px_rgba(251,113,133,0.45)] transition-all duration-300 hover:scale-105 sm:w-auto"
           >
             <Link href="/register">
               Create an account <ArrowRight className="ml-2 h-5 w-5" />
