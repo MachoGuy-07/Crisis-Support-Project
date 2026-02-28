@@ -1,94 +1,82 @@
 # Crisis Support Project
 
-A comprehensive web platform built to handle crisis support, real-time emergency reporting, and resource distribution monitoring. The application is built using modern web development standards to ensure scalability, responsiveness, and performance.
+Premium dark-themed Crisis Support platform with:
+- post-login role selection (`Victim` / `Volunteer`)
+- role-based dynamic dashboards
+- interactive Mapbox map with live radius overlays
+- realtime counters and marker updates via Socket.io
+- Express + MongoDB backend services
 
----
+## Stack
+- Frontend: Next.js (React + TypeScript), Tailwind CSS, Framer Motion
+- Backend: Node.js, Express, MongoDB (Mongoose), Socket.io
+- Mapping: Mapbox GL JS
 
-## 🚀 Important Notice
+## Role Flow
+1. Open `/login` and enter email only (no password).
+2. App routes to `/role-select`.
+3. Choose role:
+   - Victim -> `/dashboard/victim`
+   - Volunteer -> `/dashboard/volunteer`
 
-**When accessing the application (especially on local dev server or via IP on mobile), please make sure to use "Airtel" as the ISP instead of "Jio" to avoid connectivity or network fetch issues.**
+## Backend Models
+- `Ngo`
+- `Inventory`
+- `Volunteer`
+- `Request`
 
----
+## API Endpoints
+- `GET /api/health`
+- `GET /api/dashboard/victim`
+- `GET /api/dashboard/volunteer`
+- `GET /api/requests`
+- `POST /api/requests`
+- `POST /api/volunteers/offer`
+- `POST /api/volunteers/assign-request`
 
-## 🛠️ Technology Stack
-
-- **Frontend:** Next.js (App Router), React, TypeScript
-- **Styling:** Tailwind CSS, shadcn/ui
-- **Backend/Database:** Supabase
-- **Authentication:** Supabase Auth
-
----
-
-## ⚙️ How to Use
-
-### Prerequisites
-
-You need `Node.js` installed and a Supabase project set up.
-
-### Environment Setup
-
-Create a `.env.local` file in the root of your project and add your Supabase credentials:
+## Environment Variables
+Create `.env.local` in project root for frontend:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token
 ```
 
-### Installation & Running the App
+Create `.env` in project root for backend (optional defaults exist):
 
-1. Install dependencies:
+```bash
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/crisis-support
+CLIENT_ORIGIN=http://localhost:3000
+REALTIME_TICK_MS=9000
+```
+
+## Run
+Install:
 
 ```bash
 npm install
 ```
 
-2. Start the development server:
+Run frontend + backend together:
+
+```bash
+npm run dev:full
+```
+
+Run frontend only:
 
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. If connecting from a mobile device on the same network, navigate to your computer's local IP address (e.g., `http://192.168.x.x:3000`). **Remember to use an Airtel network as JIO recently started blocking the Dns.**
+Run backend only:
 
----
+```bash
+npm run server:dev
+```
 
-## 🗄️ Data Structure
-
-The application's backend is powered by **Supabase**. The core of the application relies on the following data points:
-
-### Authentication
-
-User authentication is securely handled by **Supabase Auth**. Profiles are managed automatically via Supabase's built-in `auth.users` table.
-
-### Tables
-
-1. **`requests`**
-   This table manages all emergency and crisis reports submitted by users.
-
-| Column Name   | Type               | Description                                                                 |
-| :------------ | :----------------- | :-------------------------------------------------------------------------- |
-| `id`          | `uuid`             | Primary Key, auto-generated.                                                |
-| `created_at`  | `timestamp`        | Time the request was submitted.                                             |
-| `user_id`     | `uuid`             | Foreign key referencing `auth.users(id)`. Identifies the reporter.          |
-| `type`        | `text`             | The type of crisis (e.g., `medical`, `food`, `shelter`, `rescue`, `other`). |
-| `description` | `text`             | Detailed description of the situation and needs.                            |
-| `location`    | `geography(Point)` | PostGIS Point storing the exact location coordinates (`POINT(lng lat)`).    |
-
----
-
-## ✨ Current Functionality
-
-As of the current version, the platform includes the following active features:
-
-- **User Authentication:**
-  - Complete Login and Registration flows natively integrated with Supabase.
-- **Command Center Dashboard:**
-  - A secure, authenticated dashboard for users.
-  - Real-time display of community metrics (currently mock data for active shelters, food/water drops, and medical assistance).
-- **Crisis Reporting System:**
-  - Ability to report immediate emergencies.
-  - Form validation for crisis types, custom descriptions, and geographic data.
-- **Geolocation Integration:**
-  - Integrated browser API to automatically fetch the user's current precise location (latitude & longitude) when submitting an emergency report.
-- **Responsive Design:**
-  - Fully responsive UI accessible across desktop and mobile devices.
+## Validation
+- `npm run lint` passes
+- `npm run build` passes

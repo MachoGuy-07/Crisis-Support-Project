@@ -70,9 +70,11 @@ export function AuthForm({ view }: AuthFormProps) {
           router.refresh();
         }, 1000);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrorMsg(
-        error.message || "An unexpected error occurred. Please try again.",
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again.",
       );
     } finally {
       setIsLoading(false);

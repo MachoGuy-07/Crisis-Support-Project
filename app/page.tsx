@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UsersRound } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen overflow-hidden container mx-auto px-6">
-      <header className="flex items-center justify-between py-8">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#070707]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(244,114,182,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(251,146,60,0.18),transparent_33%),linear-gradient(125deg,#030303,#0d0d0d_50%,#050505)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:44px_44px]" />
+
+      <header className="relative z-10 mx-auto flex w-full max-w-[1320px] items-center justify-between px-6 py-8">
         <Logo />
         <nav className="flex items-center gap-4">
           <Button
@@ -18,48 +21,52 @@ export default function HomePage() {
           </Button>
           <Button
             asChild
-            className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_hsla(var(--primary)/20%)]"
+            className="rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 text-zinc-900 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(251,113,133,0.45)]"
           >
-            <Link href="/register">Get Started</Link>
+            <Link href="/login">Get Started</Link>
           </Button>
         </nav>
       </header>
 
-      <main className="flex-1 flex flex-col justify-center items-center text-center max-w-4xl mx-auto py-20 px-4 z-10 animate-fade-in relative">
-        <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
-          <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="mb-8 inline-flex items-center rounded-full border border-rose-200/25 bg-rose-300/10 px-4 py-1 text-sm font-medium text-rose-100">
+          <span className="mr-2 flex h-2 w-2 rounded-full bg-rose-300 animate-pulse"></span>
           Live Crisis Updates
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-tight">
+        <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-white md:text-7xl">
           Realtime Help in <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary pb-2">
+          <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-orange-200 bg-clip-text text-transparent">
             Times of Need.
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl text-balance">
-          Crisis Support helps you give and receive real-time updates for food,
-          water, shelter, and medical assistance when it matters most.
+        <p className="mb-10 max-w-2xl text-lg text-zinc-300 md:text-xl">
+          Crisis Support connects victims and volunteers in one live command
+          system with geospatial aid tracking, inventory monitoring, and realtime
+          request handling.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+        <div className="flex w-full flex-col justify-center gap-4 sm:w-auto sm:flex-row">
           <Button
             asChild
             size="lg"
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_40px_hsla(var(--primary)/30%)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_hsla(var(--primary)/40%)] rounded-xl text-base h-14 px-8"
+            className="h-14 w-full rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 px-8 text-base text-zinc-900 shadow-[0_0_45px_rgba(251,113,133,0.45)] transition-all duration-300 hover:scale-105 sm:w-auto"
           >
-            <Link href="/register">
-              Create an account <ArrowRight className="ml-2 h-5 w-5" />
+            <Link href="/login">
+              Enter Command Center <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
           <Button
             asChild
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto border-border text-foreground hover:bg-accent transition-all duration-300 rounded-xl text-base h-14 px-8"
+            className="h-14 w-full rounded-xl border-white/20 bg-white/[0.03] px-8 text-base text-white transition-all duration-300 hover:bg-white/[0.08] sm:w-auto"
           >
-            <Link href="/login">Sign In</Link>
+            <Link href="/role-select">
+              <UsersRound className="mr-2 h-5 w-5" />
+              Choose Role
+            </Link>
           </Button>
         </div>
       </main>
