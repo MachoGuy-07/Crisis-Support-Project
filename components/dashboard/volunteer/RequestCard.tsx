@@ -27,9 +27,9 @@ interface RequestCardProps {
 }
 
 function priorityText(priority: CrisisRequest["priority"]) {
-  if (priority === "red") return "Urgent";
-  if (priority === "orange") return "Moderate";
-  return "Low";
+  if (priority === "red") return "Heavy-Load";
+  if (priority === "orange") return "Medium-Load";
+  return "Light-Load";
 }
 
 function priorityTone(priority: CrisisRequest["priority"]) {
@@ -111,7 +111,7 @@ export function RequestCard({ request, canAccept, onAccept }: RequestCardProps) 
                 </div>
               </div>
               <span
-                className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${tone.badge}`}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${tone.badge}`}
               >
                 {priorityText(request.priority)}
               </span>
@@ -179,7 +179,13 @@ export function RequestCard({ request, canAccept, onAccept }: RequestCardProps) 
         </Card>
       </motion.div>
 
-      <RequestInfoDialog open={infoOpen} onOpenChange={setInfoOpen} request={request} />
+      <RequestInfoDialog
+        open={infoOpen}
+        onOpenChange={setInfoOpen}
+        request={request}
+        canAccept={canAccept}
+        onAccept={onAccept}
+      />
     </>
   );
 }
