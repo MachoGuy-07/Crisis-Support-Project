@@ -27,9 +27,9 @@ interface RequestCardProps {
 }
 
 function priorityText(priority: CrisisRequest["priority"]) {
-  if (priority === "red") return "Heavy-Load";
-  if (priority === "orange") return "Medium-Load";
-  return "Light-Load";
+  if (priority === "red") return "Urgent";
+  if (priority === "orange") return "Moderate";
+  return "Low";
 }
 
 function priorityTone(priority: CrisisRequest["priority"]) {
@@ -90,8 +90,7 @@ export function RequestCard({
 }: RequestCardProps) {
   const [infoOpen, setInfoOpen] = useState(false);
   const tone = priorityTone(request.priority);
-  const accepted = request.status === "assigned";
-  const closed = request.status === "closed";
+  const accepted = request.status === "accepted";
 
   return (
     <>
@@ -102,11 +101,7 @@ export function RequestCard({
         transition={{ duration: 0.26 }}
       >
         <Card
-          className={`border bg-gradient-to-br py-0 backdrop-blur-xl ${
-            closed
-              ? "border-zinc-800 bg-zinc-950/40 text-zinc-500 saturate-0 opacity-80"
-              : `${tone.border} ${tone.gradient}`
-          }`}
+          className={`border bg-gradient-to-br py-0 backdrop-blur-xl ${tone.border} ${tone.gradient}`}
         >
           <CardContent className="space-y-4 p-5">
             <div className="flex items-start justify-between gap-3">
@@ -122,11 +117,7 @@ export function RequestCard({
                 </div>
               </div>
               <span
-                className={`rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${
-                  closed
-                    ? "border-zinc-700 bg-zinc-800/50 text-zinc-400"
-                    : tone.badge
-                }`}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${tone.badge}`}
               >
                 {priorityText(request.priority)}
               </span>
@@ -137,7 +128,7 @@ export function RequestCard({
               {request.itemsCount} people
             </p>
 
-            <p className="min-h-[2.8rem] overflow-hidden text-sm leading-relaxed text-zinc-300 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+            <p className="text-sm leading-relaxed text-zinc-300">
               {request.description}
             </p>
 
@@ -149,14 +140,12 @@ export function RequestCard({
             <div className="flex items-center justify-between gap-3">
               <span
                 className={`inline-flex min-w-[130px] items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium ${
-                  closed
-                    ? "border-zinc-700/50 bg-zinc-800/30 text-zinc-400"
-                    : accepted
-                      ? "border-emerald-300/35 bg-emerald-500/12 text-emerald-100"
-                      : "border-amber-300/35 bg-amber-500/12 text-amber-100"
+                  accepted
+                    ? "border-emerald-300/35 bg-emerald-500/12 text-emerald-100"
+                    : "border-amber-300/35 bg-amber-500/12 text-amber-100"
                 }`}
               >
-                {closed ? "Closed" : accepted ? "Assigned" : "Open"}
+                {accepted ? "Accepted" : "Pending"}
               </span>
               <Button
                 type="button"
@@ -171,18 +160,13 @@ export function RequestCard({
 
             <Button
               type="button"
-              disabled={accepted || closed || !canAccept}
+              disabled={accepted || !canAccept}
               onClick={onAccept}
               className={`h-11 w-full rounded-xl bg-gradient-to-r text-zinc-900 ${
-                canAccept && !closed ? tone.button : "from-zinc-500 to-zinc-500"
+                canAccept ? tone.button : "from-zinc-500 to-zinc-500"
               } disabled:cursor-not-allowed disabled:from-zinc-700 disabled:to-zinc-700 disabled:text-zinc-300`}
             >
-              {closed ? (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Completed
-                </>
-              ) : accepted ? (
+              {accepted ? (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
                   Accepted
@@ -195,7 +179,7 @@ export function RequestCard({
               ) : (
                 <>
                   <AlertCircle className="mr-2 h-4 w-4" />
-                  Unavailable
+                  Insufficient Supplies
                 </>
               )}
             </Button>
@@ -207,8 +191,6 @@ export function RequestCard({
         open={infoOpen}
         onOpenChange={setInfoOpen}
         request={request}
-        canAccept={canAccept}
-        onAccept={onAccept}
       />
     </>
   );

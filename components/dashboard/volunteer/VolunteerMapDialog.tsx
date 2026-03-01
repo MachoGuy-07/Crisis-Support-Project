@@ -33,8 +33,7 @@ export function VolunteerMapDialog({
             Emergency Request Map
           </DialogTitle>
           <DialogDescription className="text-zinc-400">
-            Request points are color-coded by urgency. Click a point to view its
-            radar zone and details.
+            Red, orange, and green low-opacity zones visualize request urgency.
           </DialogDescription>
         </DialogHeader>
         <motion.div initial={{ opacity: 0.5 }} animate={{ opacity: 1 }}>

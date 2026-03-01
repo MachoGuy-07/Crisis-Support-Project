@@ -3,12 +3,34 @@ import { Logo } from "@/components/Logo";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, UsersRound } from "lucide-react";
+// import Navbar from "@/components/navbar";
 
 export default function HomePage() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#070707]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(244,114,182,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(251,146,60,0.18),transparent_33%),linear-gradient(125deg,#030303,#0d0d0d_50%,#050505)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:44px_44px]" />
+    <div className="flex flex-col min-h-screen overflow-hidden container mx-auto px-6">
+      {/* Background ambient light effects */}
+      <div className="pointer-events-none absolute -z-10 inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(244,114,182,0.2),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(251,146,60,0.18),transparent_33%),linear-gradient(125deg,#030303,#0d0d0d_50%,#050505)]" />
+      <div className="pointer-events-none absolute -z-10 inset-0 opacity-75 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:44px_44px]" />
+      <div className="pointer-events-none absolute -z-10 inset-0 opacity-75 bg-black/25" />
+
+      <header className="flex z-10 items-center justify-between py-8">
+        <Logo />
+        <nav className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            asChild
+            className="hidden sm:inline-flex text-muted-foreground hover:text-foreground"
+          >
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-xl bg-gradient-to-r from-rose-400 to-pink-300 text-zinc-900 hover:scale-[1.03] hover:shadow-[0_0_40px_rgba(251,113,133,0.45)]"
+          >
+            <Link href="/login">Get Started</Link>
+          </Button>
+        </nav>
+      </header>
 
       <Navbar />
 
@@ -25,7 +47,7 @@ export default function HomePage() {
           </span>
         </h1>
 
-        <p className="mb-10 max-w-2xl text-lg text-zinc-300 md:text-xl">
+        <p className="mb-10 max-w-2xl text-lg text- md:text-xl">
           Crisis Support connects victims and volunteers in one live command
           system with geospatial aid tracking, inventory monitoring, and
           realtime request handling.

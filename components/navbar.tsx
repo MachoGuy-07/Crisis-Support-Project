@@ -40,8 +40,13 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {!isLoading && userEmail ? (
             <>
-              <Link href="/account">
-                <span className="text-sm font-medium text-muted-foreground inline-block bg-input/50 px-3 py-1.5 rounded-full border border-border">
+              <Link
+                href="/account"
+                //   size="sm"
+                onClick={handleSignOut}
+                //   className="border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 rounded-xl transition-all"
+              >
+                <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block bg-input/50 px-3 py-1.5 rounded-full border border-border">
                   {userEmail}
                 </span>
               </Link>

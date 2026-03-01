@@ -26,6 +26,19 @@ function Counter({ value }: { value: number }) {
     setDisplayValue(Math.round(latest));
   });
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <span className="text-4xl font-black tracking-tight text-white">
+        {value}
+      </span>
+    );
+  }
+
   return (
     <span className="text-4xl font-black tracking-tight text-white">
       {Intl.NumberFormat("en-US").format(displayValue)}

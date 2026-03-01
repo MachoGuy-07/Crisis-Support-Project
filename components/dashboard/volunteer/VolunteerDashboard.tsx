@@ -1,20 +1,15 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Map, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { RequestCard } from "@/components/dashboard/volunteer/RequestCard";
 import { VolunteerMapDialog } from "@/components/dashboard/volunteer/VolunteerMapDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDataContext } from "@/context/DataContext";
-import { supabase } from "@/lib/supabaseClient";
 import { FALLBACK_LOCATION } from "@/mockData/crisisData";
-import type {
-  CrisisRequest,
-  RequestPriority,
-  SupplyType,
-} from "@/types/crisis";
+import type { CrisisRequest } from "@/types/crisis";
 import { canVolunteerAcceptRequest } from "@/utils/requests";
 
 interface VolunteerDashboardProps {
@@ -41,100 +36,22 @@ const priorityRank = {
   green: 2,
 };
 
-function priorityFromItemsCount(itemsCount: number): RequestPriority {
-  if (itemsCount > 6) return "red";
-  if (itemsCount > 2) return "orange";
-  return "green";
-}
-
 export function VolunteerDashboard({
   email,
   mapOpen,
   onMapOpenChange,
 }: VolunteerDashboardProps) {
-  const { volunteerSupply, acceptRequest, userLocation } = useDataContext();
+  const { requests, volunteerSupply, acceptRequest, userLocation } =
+    useDataContext();
   const center = userLocation ?? FALLBACK_LOCATION;
 
-  const [dbRequests, setDbRequests] = useState<CrisisRequest[]>([]);
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [otherQuery, setOtherQuery] = useState("");
-  const visibleLimit = 9;
-
-  useEffect(() => {
-    const fetchRequests = async () => {
-      const { data, error } = await supabase
-        .from("requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching requests: ", error);
-        return;
-      }
-
-      if (data) {
-        const parsedRequests: CrisisRequest[] = data.map((req: any) => {
-          let lat = FALLBACK_LOCATION.lat;
-          let lng = FALLBACK_LOCATION.lng;
-
-          if (
-            typeof req.location === "string" &&
-            req.location.startsWith("POINT")
-          ) {
-            const match = req.location.match(/\(([^ ]+) ([^)]+)\)/);
-            if (match) {
-              lng = parseFloat(match[1]);
-              lat = parseFloat(match[2]);
-            }
-          }
-
-          const itemsCount = req.number_of_people || 1;
-
-          return {
-            id: req.id.toString(),
-            title: `${req.type.charAt(0).toUpperCase() + req.type.slice(1)} Request Support`,
-            description: req.description || "No description provided.",
-            location: { lat, lng },
-            priority: priorityFromItemsCount(itemsCount),
-            supplyType: (req.type as SupplyType) || "other",
-            itemsCount,
-            status: (() => {
-              const s = (req.status || "open").toLowerCase().trim();
-              if (s === "pending" || s === "open") return "open";
-              if (s === "accepted" || s === "assigned") return "assigned";
-              return s;
-            })(),
-            acceptedBy: req.accepted_by || null,
-            createdAt: req.created_at
-              ? new Date(req.created_at).getTime()
-              : Date.now(),
-          };
-        });
-        setDbRequests(parsedRequests);
-      }
-    };
-
-    fetchRequests();
-
-    const subscription = supabase
-      .channel("volunteer-requests-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "requests" },
-        () => {
-          fetchRequests();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const visibleLimit = 8;
 
   const filteredRequests = useMemo(() => {
-    return dbRequests.filter((request) => {
+    return requests.filter((request) => {
       if (filterType === "all") return true;
       if (filterType === "other") {
         if (request.supplyType !== "other") return false;
@@ -148,11 +65,11 @@ export function VolunteerDashboard({
       }
       return request.supplyType === filterType;
     });
-  }, [filterType, otherQuery, dbRequests]);
+  }, [filterType, otherQuery, requests]);
 
   const prioritizedRequests = useMemo(() => {
     return [...filteredRequests].sort((a, b) => {
-      if (a.status !== b.status) return a.status === "open" ? -1 : 1;
+      if (a.status !== b.status) return a.status === "pending" ? -1 : 1;
       if (a.priority !== b.priority)
         return priorityRank[a.priority] - priorityRank[b.priority];
       return b.createdAt - a.createdAt;
@@ -164,31 +81,8 @@ export function VolunteerDashboard({
     [prioritizedRequests],
   );
 
-  const handleAccept = async (request: CrisisRequest) => {
-    // Update local state right away for visual feedback
-    setDbRequests((prev) =>
-      prev.map((r) =>
-        r.id === request.id
-          ? { ...r, status: "assigned", acceptedBy: email }
-          : r,
-      ),
-    );
-
-    // Update the database
-    const { error } = await supabase
-      .from("requests")
-      .update({ status: "assigned", accepted_by: email })
-      .eq("id", request.id);
-
-    if (error) {
-      console.error("Error accepting request in Supabase: ", error);
-      // Revert if failed
-      setDbRequests((prev) =>
-        prev.map((r) =>
-          r.id === request.id ? { ...r, status: "open", acceptedBy: null } : r,
-        ),
-      );
-    }
+  const handleAccept = (request: CrisisRequest) => {
+    acceptRequest(request.id, email);
   };
 
   return (
@@ -255,7 +149,7 @@ export function VolunteerDashboard({
 
       <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-xl sm:p-5">
         {visibleRequests.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {visibleRequests.map((request) => (
               <RequestCard
                 key={request.id}
@@ -282,7 +176,7 @@ export function VolunteerDashboard({
       <button
         type="button"
         onClick={() => onMapOpenChange(true)}
-        className="fixed bottom-5 right-5 z-30 rounded-full border border-orange-300/35 bg-orange-400/20 p-4 text-orange-100 shadow-[0_10px_40px_-20px_rgba(245,158,11,1)] backdrop-blur-xl"
+        className="fixed bottom-5 right-5 z-30 rounded-full border border-orange-300/35 bg-orange-400/20 p-4 text-orange-100 shadow-[0_10px_40px_-20px_rgba(245,158,11,1)] backdrop-blur-xl lg:hidden"
       >
         <Map className="h-5 w-5" />
       </button>

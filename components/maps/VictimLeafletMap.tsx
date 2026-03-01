@@ -2,12 +2,13 @@
 
 import dynamic from "next/dynamic";
 
-import type { NGO, OrderResult } from "@/types/crisis";
+import type { NGO, OrderResult, UrgencyLevel } from "@/types/crisis";
 
 interface VictimLeafletMapProps {
   userLocation: { lat: number; lng: number };
   ngos: NGO[];
   radiusKm: number;
+  urgency: UrgencyLevel;
   pulseScale: number;
   email: string;
   onPlaceOrder: (payload: {

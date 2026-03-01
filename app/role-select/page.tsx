@@ -7,30 +7,38 @@ import { useEffect, useState } from "react";
 
 import { RoleSelectorCircle } from "@/components/dashboard/RoleSelectorCircle";
 import { Button } from "@/components/ui/button";
-import { clearSession, getUserEmail, setUserRole } from "@/lib/session";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function RoleSelectPage() {
   const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedEmail = getUserEmail();
-    if (!storedEmail) {
-      router.replace("/login");
-      return;
-    }
-    // Hydration-safe: read browser storage only after mount.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEmail(storedEmail);
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      } else {
+        setEmail(session.user.email ?? null);
+      }
+    };
+
+    checkUser();
   }, [router]);
 
   const handleRoleChoose = (role: "victim" | "volunteer") => {
-    setUserRole(role);
-    router.push(`/dashboard/${role}`);
+    if (role === "victim") {
+      router.push("/victim");
+    } else {
+      router.push("/dashboard");
+    }
   };
 
-  const handleSignOut = () => {
-    clearSession();
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     router.replace("/login");
   };
 
@@ -58,8 +66,9 @@ export default function RoleSelectPage() {
             Choose Your Role
           </h1>
           <p className="mt-3 text-zinc-400">
-            Signed in as <span className="font-semibold text-zinc-200">{email}</span>.
-            Pick your mode to continue.
+            Signed in as{" "}
+            <span className="font-semibold text-zinc-200">{email}</span>. Pick
+            your mode to continue.
           </p>
         </div>
 

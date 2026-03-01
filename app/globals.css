@@ -113,7 +113,9 @@
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.9);
   background: radial-gradient(circle at 30% 30%, #f9a8d4, #ec4899);
-  box-shadow: 0 0 0 3px rgba(249, 168, 212, 0.22), 0 12px 24px -14px #ec4899;
+  box-shadow:
+    0 0 0 3px rgba(249, 168, 212, 0.22),
+    0 12px 24px -14px #ec4899;
 }
 
 .leaflet-ngo-marker-inner {
@@ -123,7 +125,9 @@
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.9);
   background: radial-gradient(circle at 30% 30%, #fdba74, #f97316);
-  box-shadow: 0 0 0 3px rgba(253, 186, 116, 0.22), 0 12px 24px -16px #f97316;
+  box-shadow:
+    0 0 0 3px rgba(253, 186, 116, 0.22),
+    0 12px 24px -16px #f97316;
 }
 
 .leaflet-volunteer-marker-inner {
@@ -133,5 +137,7 @@
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.9);
   background: radial-gradient(circle at 30% 30%, #f87171, #ef4444);
-  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.22), 0 12px 24px -16px #ef4444;
+  box-shadow:
+    0 0 0 3px rgba(248, 113, 113, 0.22),
+    0 12px 24px -16px #ef4444;
 }
