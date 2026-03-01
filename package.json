@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "server:dev": "node --watch server/index.js",
+    "server:start": "node server/index.js",
+    "dev:full": "concurrently \"npm run server:dev\" \"npm run dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

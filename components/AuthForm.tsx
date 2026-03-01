@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2, AlertCircle } from "lucide-react";
+import { setUserEmail } from "@/lib/session";
 
 import {
   Form,
@@ -52,9 +53,12 @@ export function AuthForm({ view }: AuthFormProps) {
       if (view === "register") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setSuccessMsg("Registration successful! Redirecting to dashboard...");
+        setUserEmail(email);
+        setSuccessMsg(
+          "Registration successful! Redirecting to role selection...",
+        );
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/role-select");
           router.refresh();
         }, 1000);
       } else {
@@ -63,10 +67,13 @@ export function AuthForm({ view }: AuthFormProps) {
           password,
         });
         if (error) throw error;
-        setSuccessMsg("Successfully logged in! Redirecting...");
-        // Usually, wait a second and push to dashboard
+        setUserEmail(email);
+        setSuccessMsg(
+          "Successfully logged in! Redirecting to role selection...",
+        );
+        // Usually, wait a second and push to role select
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/role-select");
           router.refresh();
         }, 1000);
       }

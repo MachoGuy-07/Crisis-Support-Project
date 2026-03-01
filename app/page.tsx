@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, UsersRound } from "lucide-react";
 // import Navbar from "@/components/navbar";
@@ -31,9 +32,11 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <main className="flex-1 flex flex-col justify-center items-center text-center max-w-4xl mx-auto py-20 px-4 z-10 animate-fade-in relative">
-        <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8">
-          <span className="flex h-2 w-2 rounded-full bg-secondary mr-2 animate-pulse"></span>
+      <Navbar />
+
+      <main className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
+        <div className="mb-8 inline-flex items-center rounded-full border border-rose-200/25 bg-rose-300/10 px-4 py-1 text-sm font-medium text-rose-100">
+          <span className="mr-2 flex h-2 w-2 rounded-full bg-rose-300 animate-pulse"></span>
           Live Crisis Updates
         </div>
 
@@ -50,7 +53,7 @@ export default function HomePage() {
           realtime request handling.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+        <div className="flex w-full flex-col justify-center gap-4 sm:w-auto sm:flex-row">
           <Button
             asChild
             size="lg"
@@ -64,9 +67,12 @@ export default function HomePage() {
             asChild
             variant="outline"
             size="lg"
-            className="w-full sm:w-auto border-border text-foreground hover:bg-accent transition-all duration-300 rounded-xl text-base h-14 px-8"
+            className="h-14 w-full rounded-xl border-white/20 bg-white/[0.03] px-8 text-base text-white transition-all duration-300 hover:bg-white/[0.08] sm:w-auto"
           >
-            <Link href="/login">Sign In</Link>
+            <Link href="/role-select">
+              <UsersRound className="mr-2 h-5 w-5" />
+              Choose Role
+            </Link>
           </Button>
         </div>
       </main>

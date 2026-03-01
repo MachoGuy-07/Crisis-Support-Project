@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
@@ -28,15 +28,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Form state
-  const [isReportOpen, setIsReportOpen] = useState(false);
-  const [reportType, setReportType] = useState("");
-  const [reportDescription, setReportDescription] = useState("");
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function DashboardRedirectPage() {
+  const router = useRouter();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -98,50 +91,14 @@ export default function DashboardPage() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        alert("You must be logged in to report a crisis.");
-        return;
-      }
-
-      const locationWKT = `POINT(${location.lng} ${location.lat})`;
-
-      const { error } = await supabase.from("requests").insert({
-        user_id: session.user.id,
-        type: reportType,
-        description: reportDescription,
-        location: locationWKT,
-      });
-
-      if (error) throw error;
-
-      alert("Crisis reported successfully. Help is on the way.");
-      setIsReportOpen(false);
-      setReportType("");
-      setReportDescription("");
-      setLocation(null);
-    } catch (error: unknown) {
-      console.error("Error submitting report:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to submit report.";
-      alert(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+    const role = getUserRole();
+    if (!role) {
+      router.replace("/role-select");
+      return;
     }
-  };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+    router.replace(`/dashboard/${role}`);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col animate-fade-in relative overflow-hidden">
