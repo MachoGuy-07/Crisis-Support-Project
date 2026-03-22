@@ -7,6 +7,17 @@ Premium dark-themed Crisis Support platform with:
 - realtime counters and marker updates via Socket.io
 - Express + MongoDB backend services
 
+## Screenshots
+<div align="center">
+  <img src="./Screenshot%20(1).png" alt="Screenshot 1" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(2).png" alt="Screenshot 2" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(3).png" alt="Screenshot 3" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(4).png" alt="Screenshot 4" width="800">
+</div>
+
 ## Stack
 - Frontend: Next.js (React + TypeScript), Tailwind CSS, Framer Motion
 - Backend: Node.js, Express, MongoDB (Mongoose), Socket.io
