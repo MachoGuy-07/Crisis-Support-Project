@@ -1,11 +1,24 @@
 # Crisis Support Project
 
+**Live Demo:** [delightful-cat-3b3731.netlify.app](https://delightful-cat-3b3731.netlify.app/)
+
 Premium dark-themed Crisis Support platform with:
 - post-login role selection (`Victim` / `Volunteer`)
 - role-based dynamic dashboards
 - interactive Mapbox map with live radius overlays
 - realtime counters and marker updates via Socket.io
 - Express + MongoDB backend services
+
+## Screenshots
+<div align="center">
+  <img src="./Screenshot%20(1).png" alt="Screenshot 1" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(2).png" alt="Screenshot 2" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(3).png" alt="Screenshot 3" width="800">
+  <br/><br/>
+  <img src="./Screenshot%20(4).png" alt="Screenshot 4" width="800">
+</div>
 
 ## Stack
 - Frontend: Next.js (React + TypeScript), Tailwind CSS, Framer Motion
